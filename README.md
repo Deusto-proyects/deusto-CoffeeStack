@@ -44,11 +44,11 @@ Se utiliza **GitHub Projects** como soporte operativo de SCRUM para organizar hi
 - Referencia de trabajo con **Ideal Day ~1 h/día por persona** dentro de la capacidad académica definida.
 
 ## 4. Planificación de Sprints
-| Sprint | Fechas | Objetivo | Historias incluidas | Horas estimadas | Criterios de validación |
+| Sprint | Fechas | Objetivo | Historias incluidas | Criterios de validación |
 |---|---|---|---|---|---|
-| Sprint 1 | 9-25 marzo (review 26 marzo) | Inventario base operable con acceso por roles | CORE-01 a CORE-08, ADM-02 | No desglosadas por sprint en el contexto; estimación global del backlog del equipo: 80 h | Alta de insumos, registro de lote, consulta de stock, registro de merma con login |
-| Sprint 2 | 13-28 abril (review 29 abril) | Registro de ventas y descuento automático de inventario + alertas | CORE-09 a CORE-13, INT-01, INT-02 | No desglosadas por sprint en el contexto; estimación global del backlog del equipo: 80 h | Venta con descuento por receta/FEFO y alertas de stock/caducidad |
-| Sprint 3 | 4-18 mayo (review 19 mayo) | Reposición automática, pronóstico y reportes exportables | INT-03 a INT-05, ADM-01, ADM-03, REP-01 a REP-04 | No desglosadas por sprint en el contexto; estimación global del backlog del equipo: 80 h | Sugerencia de compra, forecast SES, reportes y exportación CSV |
+| Sprint 1 | 9-25 marzo (review 26 marzo) | Inventario base operable con acceso por roles | CORE-01 a CORE-08, ADM-02 | Alta de insumos, registro de lote, consulta de stock, registro de merma con login |
+| Sprint 2 | 13-28 abril (review 29 abril) | Registro de ventas y descuento automático de inventario + alertas | CORE-09 a CORE-13, INT-01, INT-02 | Venta con descuento por receta/FEFO y alertas de stock/caducidad |
+| Sprint 3 | 4-18 mayo (review 19 mayo) | Reposición automática, pronóstico y reportes exportables | INT-03 a INT-05, ADM-01, ADM-03, REP-01 a REP-04 | Sugerencia de compra, forecast SES, reportes y exportación CSV |
 
 ## 5. Product Backlog
 El Product Backlog se estructura mediante historias de usuario con identificador funcional y criterios de negocio.
