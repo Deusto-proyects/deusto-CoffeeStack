@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,6 +27,7 @@ class ItemControllerIT {
     ObjectMapper objectMapper;
 
     @Test
+    @WithMockUser(roles = "ROOT")
     void create_and_get() throws Exception {
         ItemCreateRequest req = new ItemCreateRequest();
         req.setName("Item 1");
@@ -48,9 +50,29 @@ class ItemControllerIT {
     }
 
     @Test
+    @WithMockUser(roles = "EMPLEADO")
     void list_shouldReturnPage() throws Exception {
         mockMvc.perform(get("/api/items"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", isA(java.util.List.class)));
+    }
+
+    @Test
+    void sinAutenticar_devuelve401() throws Exception {
+        mockMvc.perform(get("/api/items"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(roles = "EMPLEADO")
+    void empleado_crearItem_devuelve403() throws Exception {
+        ItemCreateRequest req = new ItemCreateRequest();
+        req.setName("Forbid");
+        req.setDescription("x");
+
+        mockMvc.perform(post("/api/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isForbidden());
     }
 }

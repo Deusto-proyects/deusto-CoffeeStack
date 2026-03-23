@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -74,6 +75,7 @@ class StockControllerIT {
     }
 
     @Test
+    @WithMockUser(roles = "EMPLEADO")
     void getAllStock_returnsListWithBothInsumos() throws Exception {
         mockMvc.perform(get("/api/stock/insumos"))
                 .andExpect(status().isOk())
@@ -82,6 +84,7 @@ class StockControllerIT {
     }
 
     @Test
+    @WithMockUser(roles = "EMPLEADO")
     void getStockByInsumo_cafeHasNoRisk() throws Exception {
         mockMvc.perform(get("/api/stock/insumos/" + cafeId))
                 .andExpect(status().isOk())
@@ -92,6 +95,7 @@ class StockControllerIT {
     }
 
     @Test
+    @WithMockUser(roles = "EMPLEADO")
     void getStockByInsumo_lecheHasRisk() throws Exception {
         mockMvc.perform(get("/api/stock/insumos"))
                 .andExpect(status().isOk())
@@ -100,8 +104,15 @@ class StockControllerIT {
     }
 
     @Test
+    @WithMockUser(roles = "EMPLEADO")
     void getStockByInsumo_notFound_returns404() throws Exception {
         mockMvc.perform(get("/api/stock/insumos/99999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void sinAutenticar_devuelve401() throws Exception {
+        mockMvc.perform(get("/api/stock/insumos"))
+                .andExpect(status().isUnauthorized());
     }
 }
