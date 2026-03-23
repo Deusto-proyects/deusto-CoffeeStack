@@ -52,7 +52,8 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Item no encontrado: " + id));
         item.setName(request.getName());
         item.setDescription(request.getDescription());
-        return ItemMapper.toResponse(item);
+        Item saved = repository.save(item);
+        return ItemMapper.toResponse(saved);
     }
 
     @Override

@@ -58,7 +58,13 @@ class ItemServiceTest {
         item.setName("Old");
         item.setDescription("Old");
 
+        Item savedItem = new Item();
+        savedItem.setId(1L);
+        savedItem.setName("New");
+        savedItem.setDescription("New");
+
         when(repository.findById(1L)).thenReturn(Optional.of(item));
+        when(repository.save(any(Item.class))).thenReturn(savedItem);
 
         var req = new com.deusto.coffeestack.dto.ItemUpdateRequest();
         req.setName("New");
@@ -67,9 +73,7 @@ class ItemServiceTest {
         var response = service.update(1L, req);
 
         assertEquals("New", response.getName());
-
-        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
         verify(repository).findById(1L);
-        verify(repository, never()).save(captor.capture());
+        verify(repository, times(1)).save(any(Item.class));
     }
 }
