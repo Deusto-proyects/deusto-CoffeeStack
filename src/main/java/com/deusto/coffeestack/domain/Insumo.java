@@ -27,6 +27,13 @@ public class Insumo {
     @Column(name = "stock_minimo_alerta", nullable = false)
     private double stockMinimoAlerta;
 
+    /**
+     * Logical active flag. When false the insumo is considered deactivated
+     * and should not appear in active-only queries.
+     */
+    @Column(nullable = false)
+    private boolean activo = true;
+
     // ---- getters & setters ----
 
     public Long getId() { return id; }
@@ -40,4 +47,8 @@ public class Insumo {
 
     public double getStockMinimoAlerta() { return stockMinimoAlerta; }
     public void setStockMinimoAlerta(double stockMinimoAlerta) { this.stockMinimoAlerta = stockMinimoAlerta; }
+
+    public boolean isActivo() { return activo; }
+    public void setActivo(boolean activo) { this.activo = activo; }
 }
+

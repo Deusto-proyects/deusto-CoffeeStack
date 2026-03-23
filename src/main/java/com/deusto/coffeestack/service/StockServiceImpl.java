@@ -63,7 +63,8 @@ public class StockServiceImpl implements StockService {
                 insumo.getId(),
                 insumo.getNombre(),
                 insumo.getUnidadMedida(),
-                insumo.getStockMinimoAlerta());
+                insumo.getStockMinimoAlerta(),
+                insumo.isActivo());
 
         return new StockInsumoResponse(insumoResponse, cantidadTotal, tieneRiesgo, loteResponses);
     }
