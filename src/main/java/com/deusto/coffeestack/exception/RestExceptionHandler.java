@@ -24,4 +24,9 @@ public class RestExceptionHandler {
                 .collect(Collectors.joining("; "));
         return ResponseEntity.badRequest().body(new ApiError(msg));
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(new ApiError(ex.getMessage()));
+    }
 }

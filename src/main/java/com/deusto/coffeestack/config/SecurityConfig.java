@@ -81,6 +81,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.DELETE, "/api/stock/**").hasAnyRole("PROPIETARIO", "ROOT")
 
                     // User management → ROOT only (also enforced via @PreAuthorize)
+                    .requestMatchers(HttpMethod.GET, "/api/proveedores/**").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/proveedores/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")
                     .requestMatchers("/api/usuarios/**").hasRole("ROOT")
 
                     .anyRequest().authenticated()

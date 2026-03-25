@@ -56,7 +56,8 @@ public class StockServiceImpl implements StockService {
                         l.getNumeroLote(),
                         l.getCantidadInicial(),
                         l.getCantidadActual(),
-                        l.getFechaVencimiento()))
+                        l.getFechaVencimiento(),
+                        l.getProveedor() != null ? l.getProveedor().getNombre() : null))
                 .toList();
 
         InsumoResponse insumoResponse = new InsumoResponse(
