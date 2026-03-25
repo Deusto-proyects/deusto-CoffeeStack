@@ -31,7 +31,7 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 @PreAuthorize("hasRole('ROOT')")
 @Tag(name = "Usuarios", description = "Gestión de usuarios y roles (solo ROOT)")
-@SecurityRequirement(name = "basicAuth")
+@SecurityRequirement(name = "bearerAuth")
 public class UsuarioController {
 
     private final UsuarioService service;

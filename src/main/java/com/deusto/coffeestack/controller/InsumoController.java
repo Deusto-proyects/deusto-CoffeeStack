@@ -29,7 +29,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/insumos")
 @Tag(name = "Insumos", description = "Gestión del catálogo de insumos")
-@SecurityRequirement(name = "basicAuth")
+@SecurityRequirement(name = "bearerAuth")
 public class InsumoController {
 
     private final InsumoService service;

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew bootRun)",
+      "Bash(java -version)",
+      "Bash(where java:*)",
+      "Bash(JAVA_HOME=\"C:/Users/idiez/AppData/Local/Programs/Eclipse Adoptium/jdk-25.0.2.10-hotspot\" ./gradlew bootRun)",
+      "Bash(./gradlew bootRun -Dorg.gradle.java.home=\"C:/Users/idiez/AppData/Local/Programs/Eclipse Adoptium/jdk-25.0.2.10-hotspot\")"
+    ]
+  }
+}
