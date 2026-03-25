@@ -10,9 +10,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @SecurityScheme(
-        name = "basicAuth",
+        name = "bearerAuth",
         type = SecuritySchemeType.HTTP,
-        scheme = "basic"
+        scheme = "bearer",
+        bearerFormat = "JWT"
 )
 public class OpenApiConfig {
 
@@ -22,7 +23,6 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("CoffeeStack API")
                         .version("1.0.0"))
-                // Aplica basicAuth globalmente a todos los endpoints
-                .addSecurityItem(new SecurityRequirement().addList("basicAuth"));
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 }

@@ -4,6 +4,8 @@ import com.deusto.coffeestack.dto.ItemCreateRequest;
 import com.deusto.coffeestack.dto.ItemResponse;
 import com.deusto.coffeestack.dto.ItemUpdateRequest;
 import com.deusto.coffeestack.service.ItemService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,8 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api/items")
+@Tag(name = "Items", description = "Gestión de ítems del menú")
+@SecurityRequirement(name = "bearerAuth")
 public class ItemController {
 
     private final ItemService service;

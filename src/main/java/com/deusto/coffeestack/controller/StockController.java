@@ -2,6 +2,8 @@ package com.deusto.coffeestack.controller;
 
 import com.deusto.coffeestack.dto.StockInsumoResponse;
 import com.deusto.coffeestack.service.StockService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/stock")
+@Tag(name = "Stock", description = "Consulta de stock por insumo")
+@SecurityRequirement(name = "bearerAuth")
 public class StockController {
 
     private final StockService stockService;
