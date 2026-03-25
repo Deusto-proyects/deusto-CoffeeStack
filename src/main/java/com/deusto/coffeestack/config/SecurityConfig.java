@@ -80,6 +80,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/stock/**").hasAnyRole("PROPIETARIO", "ROOT")
                     .requestMatchers(HttpMethod.DELETE, "/api/stock/**").hasAnyRole("PROPIETARIO", "ROOT")
 
+                    // Ajustes (mermas/roturas): read → any authenticated; write → PROPIETARIO or ROOT
+                    .requestMatchers(HttpMethod.GET, "/api/ajustes/**").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/ajustes/**").hasAnyRole("PROPIETARIO", "ROOT")
+
                     // User management → ROOT only (also enforced via @PreAuthorize)
                     .requestMatchers(HttpMethod.GET, "/api/proveedores/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/proveedores/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")

@@ -8,5 +8,7 @@ CREATE TABLE proveedores (
 );
 
 ALTER TABLE lotes
-    ADD COLUMN proveedor_id BIGINT NULL,
+    ADD COLUMN proveedor_id BIGINT NULL;
+
+ALTER TABLE lotes
     ADD CONSTRAINT fk_lote_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores (id);
