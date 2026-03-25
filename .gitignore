@@ -2,6 +2,7 @@
 .gradle/
 build/
 
+.claude/
 # Java build outputs
 out/
 bin/
