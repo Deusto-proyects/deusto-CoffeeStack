@@ -70,7 +70,6 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/stock/**").hasAnyRole("PROPIETARIO", "ROOT")
                     .requestMatchers(HttpMethod.DELETE, "/api/stock/**").hasAnyRole("PROPIETARIO", "ROOT")
 
-<<<<<<< Updated upstream
                     // Ajustes (mermas/roturas): read → any authenticated; write → PROPIETARIO or ROOT
                     .requestMatchers(HttpMethod.GET, "/api/ajustes/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/ajustes/**").hasAnyRole("PROPIETARIO", "ROOT")
@@ -83,8 +82,6 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/lotes/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/lotes/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")
 
-=======
->>>>>>> Stashed changes
                     .requestMatchers("/api/usuarios/**").hasRole("ROOT")
 
                     .anyRequest().authenticated()
