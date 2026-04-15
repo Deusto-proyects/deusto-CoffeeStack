@@ -66,6 +66,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.PUT, "/api/items/**").hasAnyRole("PROPIETARIO", "ROOT")
                     .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAnyRole("PROPIETARIO", "ROOT")
 
+                    .requestMatchers(HttpMethod.GET, "/api/items/*/receta").authenticated()
+                    .requestMatchers(HttpMethod.PUT, "/api/items/*/receta").hasAnyRole("PROPIETARIO", "ROOT")
+                    .requestMatchers(HttpMethod.DELETE, "/api/items/*/receta").hasAnyRole("PROPIETARIO", "ROOT")
+
                     .requestMatchers(HttpMethod.GET, "/api/stock/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/stock/**").hasAnyRole("PROPIETARIO", "ROOT")
                     .requestMatchers(HttpMethod.DELETE, "/api/stock/**").hasAnyRole("PROPIETARIO", "ROOT")
