@@ -1,0 +1,105 @@
+:root {
+  --coffee-dark: #3e2723;
+  --coffee: #6f4e37;
+  --coffee-light: #a98467;
+  --cream: #f5e9da;
+  --cream-soft: #faf5ef;
+}
+
+body {
+  background-color: var(--cream-soft);
+  color: #2b1a15;
+  min-height: 100vh;
+}
+
+.bg-coffee {
+  background-color: var(--coffee-dark) !important;
+}
+
+.text-coffee {
+  color: var(--coffee-dark) !important;
+}
+
+.btn-coffee {
+  background-color: var(--coffee);
+  border-color: var(--coffee);
+  color: #fff;
+}
+
+.btn-coffee:hover,
+.btn-coffee:focus {
+  background-color: var(--coffee-dark);
+  border-color: var(--coffee-dark);
+  color: #fff;
+}
+
+.btn-outline-coffee {
+  color: var(--coffee);
+  border-color: var(--coffee);
+}
+
+.btn-outline-coffee:hover {
+  background-color: var(--coffee);
+  color: #fff;
+}
+
+.navbar-brand .bi {
+  color: var(--cream);
+}
+
+.card {
+  border: 1px solid #e9dccd;
+  box-shadow: 0 1px 3px rgba(62, 39, 35, 0.08);
+}
+
+.card-header {
+  background-color: var(--cream);
+  border-bottom: 1px solid #e9dccd;
+  font-weight: 600;
+  color: var(--coffee-dark);
+}
+
+.table thead th {
+  background-color: var(--cream);
+  color: var(--coffee-dark);
+  border-bottom: 2px solid var(--coffee-light);
+}
+
+.badge-rol-ROOT {
+  background-color: #b71c1c;
+}
+.badge-rol-PROPIETARIO {
+  background-color: var(--coffee);
+}
+.badge-rol-EMPLEADO {
+  background-color: #546e7a;
+}
+
+.stock-alert {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #888;
+}
+
+.login-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.login-card {
+  max-width: 420px;
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
