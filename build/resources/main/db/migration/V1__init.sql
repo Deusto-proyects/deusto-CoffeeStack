@@ -1,6 +1,0 @@
-﻿CREATE TABLE items (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(120) NOT NULL,
-    description VARCHAR(500),
-    created_at TIMESTAMP NOT NULL
-);
