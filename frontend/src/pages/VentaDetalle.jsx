@@ -30,7 +30,7 @@ export default function VentaDetalle() {
       <PageHeader
         title={`Venta #${venta.id}`}
         icon="bi-receipt"
-        action={
+        actions={
           <Link to="/ventas" className="btn btn-outline-secondary">
             <i className="bi bi-arrow-left me-1" />
             Volver

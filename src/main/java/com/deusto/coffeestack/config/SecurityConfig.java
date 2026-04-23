@@ -91,6 +91,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/lotes/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/lotes/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")
 
+                    // Ventas: registrar → EMPLEADO o superior; consultar → cualquier autenticado
+                    .requestMatchers(HttpMethod.GET, "/api/ventas/**").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/ventas/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")
+
                     .requestMatchers("/api/usuarios/**").hasRole("ROOT")
 
                     .anyRequest().authenticated()

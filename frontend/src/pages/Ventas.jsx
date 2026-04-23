@@ -23,7 +23,7 @@ export default function Ventas() {
       <PageHeader
         title="Ventas"
         icon="bi-receipt"
-        action={
+        actions={
           <Link to="/ventas/nueva" className="btn btn-coffee">
             <i className="bi bi-plus-lg me-1" />
             Nueva venta

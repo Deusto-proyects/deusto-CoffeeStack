@@ -21,10 +21,11 @@ export default function VentaForm() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    client.get('/api/items')
+    client.get('/api/items', { params: { size: 100 } })
       .then(r => {
-        setItems(r.data)
-        if (r.data.length > 0) setItemSelId(String(r.data[0].id))
+        const list = r.data.content ?? r.data
+        setItems(list)
+        if (list.length > 0) setItemSelId(String(list[0].id))
       })
       .catch(e => setError(apiErrorMessage(e)))
   }, [])

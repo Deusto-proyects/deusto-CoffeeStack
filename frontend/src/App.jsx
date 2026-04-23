@@ -125,7 +125,6 @@ export default function App() {
         />
 
         <Route path="ventas" element={<Ventas />} />
-        <Route path="ventas/:id" element={<VentaDetalle />} />
         <Route
           path="ventas/nueva"
           element={
@@ -134,6 +133,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="ventas/:id" element={<VentaDetalle />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
