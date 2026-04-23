@@ -19,6 +19,9 @@ import Ajustes from './pages/Ajustes'
 import AjusteForm from './pages/AjusteForm'
 import Usuarios from './pages/Usuarios'
 import UsuarioForm from './pages/UsuarioForm'
+import Ventas from './pages/Ventas'
+import VentaForm from './pages/VentaForm'
+import VentaDetalle from './pages/VentaDetalle'
 
 export default function App() {
   return (
@@ -117,6 +120,17 @@ export default function App() {
           element={
             <ProtectedRoute roles={['ROOT']}>
               <UsuarioForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="ventas" element={<Ventas />} />
+        <Route path="ventas/:id" element={<VentaDetalle />} />
+        <Route
+          path="ventas/nueva"
+          element={
+            <ProtectedRoute roles={['EMPLEADO', 'PROPIETARIO', 'ROOT']}>
+              <VentaForm />
             </ProtectedRoute>
           }
         />

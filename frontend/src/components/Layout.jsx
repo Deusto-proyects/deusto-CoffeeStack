@@ -48,6 +48,7 @@ export default function Layout() {
               {navItem('/lotes', 'bi-boxes', 'Lotes')}
               {navItem('/proveedores', 'bi-truck', 'Proveedores')}
               {navItem('/ajustes', 'bi-clipboard-data', 'Ajustes')}
+              {navItem('/ventas', 'bi-receipt', 'Ventas')}
               {hasRole('ROOT') && navItem('/usuarios', 'bi-people-fill', 'Usuarios')}
             </ul>
             <ul className="navbar-nav ms-auto">
