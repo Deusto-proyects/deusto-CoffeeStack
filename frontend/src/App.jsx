@@ -17,6 +17,7 @@ import Proveedores from './pages/Proveedores'
 import ProveedorForm from './pages/ProveedorForm'
 import Ajustes from './pages/Ajustes'
 import AjusteForm from './pages/AjusteForm'
+import HistorialMovimientos from './pages/HistorialMovimientos'
 import Usuarios from './pages/Usuarios'
 import UsuarioForm from './pages/UsuarioForm'
 import Ventas from './pages/Ventas'
@@ -103,6 +104,15 @@ export default function App() {
           element={
             <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
               <AjusteForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="historial"
+          element={
+            <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
+              <HistorialMovimientos />
             </ProtectedRoute>
           }
         />
