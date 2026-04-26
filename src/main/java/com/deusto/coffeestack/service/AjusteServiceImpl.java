@@ -83,7 +83,7 @@ public class AjusteServiceImpl implements AjusteService {
     @Override
     @Transactional(readOnly = true)
     public List<MovimientoResponse> listarMovimientos() {
-        return movimientoRepository.findAll()
+        return movimientoRepository.findAllByOrderByFechaHoraDesc()
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -108,6 +108,18 @@ public class AjusteServiceImpl implements AjusteService {
         return tipo == TipoMovimiento.MERMA
                 || tipo == TipoMovimiento.ROTURA
                 || tipo == TipoMovimiento.AJUSTE_NEGATIVO;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovimientoResponse> listarMovimientosFiltrados(Long insumoId,
+                                                               TipoMovimiento tipo,
+                                                               LocalDateTime desde,
+                                                               LocalDateTime hasta) {
+        return movimientoRepository.findByFilters(insumoId, tipo, desde, hasta)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     private MovimientoResponse toResponse(MovimientoInventario m) {
