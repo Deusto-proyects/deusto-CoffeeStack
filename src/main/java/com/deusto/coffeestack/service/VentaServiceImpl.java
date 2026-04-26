@@ -69,11 +69,6 @@ public class VentaServiceImpl implements VentaService {
                             "Producto no encontrado: " + linea.getItemId()));
 
             List<RecetaItem> ingredientes = recetaItemRepository.findByItemId(item.getId());
-            if (ingredientes.isEmpty()) {
-                throw new IllegalArgumentException(
-                        "El producto '" + item.getName() + "' no tiene receta definida. " +
-                        "Define la receta antes de registrar una venta.");
-            }
 
             for (RecetaItem ri : ingredientes) {
                 double cantidadNecesaria = ri.getCantidad() * linea.getCantidadUnidades();
