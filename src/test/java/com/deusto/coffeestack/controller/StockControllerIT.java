@@ -5,6 +5,7 @@ import com.deusto.coffeestack.domain.Lote;
 import com.deusto.coffeestack.repository.InsumoRepository;
 import com.deusto.coffeestack.repository.LoteRepository;
 import com.deusto.coffeestack.repository.MovimientoInventarioRepository;
+import com.deusto.coffeestack.repository.RecetaItemRepository;
 import com.deusto.coffeestack.repository.VentaLineaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class StockControllerIT {
     @Autowired
     VentaLineaRepository ventaLineaRepository;
 
+    @Autowired
+    RecetaItemRepository recetaItemRepository;
+
     private Long cafeId;
 
     @BeforeEach
@@ -46,6 +50,7 @@ class StockControllerIT {
         // Borrar tablas dependientes antes de lotes e insumos para respetar FKs
         movimientoRepository.deleteAll();
         ventaLineaRepository.deleteAll();
+        recetaItemRepository.deleteAll();
         loteRepository.deleteAll();
         insumoRepository.deleteAll();
 

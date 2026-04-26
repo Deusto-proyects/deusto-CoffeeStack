@@ -169,12 +169,12 @@ class AjusteServiceTest {
 
     @Test
     void listarMovimientos_returnsAll() {
-        when(movimientoRepository.findAll()).thenReturn(List.of());
+        when(movimientoRepository.findAllByOrderByFechaHoraDesc()).thenReturn(List.of());
 
         List<MovimientoResponse> result = ajusteService.listarMovimientos();
 
         assertTrue(result.isEmpty());
-        verify(movimientoRepository).findAll();
+        verify(movimientoRepository).findAllByOrderByFechaHoraDesc();
     }
 
     @Test
