@@ -38,6 +38,21 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    // Excluir tests de integración de la tarea test normal
+    exclude '**/*IT.class'
 }
+
+// Tarea dedicada para tests de integración
+task integrationTest(type: Test) {
+    useJUnitPlatform()
+    // Incluir solo los tests de integración
+    include '**/*IT.class'
+    
+    // Ejecutar después de los unitarios
+    shouldRunAfter test
+}
+
+// Hacer que ./gradlew build o check también lance los de integración
+check.dependsOn integrationTest
 
 

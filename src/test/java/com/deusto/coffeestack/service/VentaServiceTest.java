@@ -88,7 +88,7 @@ class VentaServiceTest {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(recetaItemRepository.findByItemId(1L)).thenReturn(List.of(recetaItem));
         when(loteRepository.sumCantidadActualByInsumoId(10L)).thenReturn(10.0);
-        when(loteRepository.findByInsumoId(10L)).thenReturn(List.of(lote));
+        when(loteRepository.findByInsumoIdForUpdate(10L)).thenReturn(List.of(lote));
         when(loteRepository.save(any())).thenReturn(lote);
         when(movimientoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         stubVentaSave();
@@ -121,7 +121,7 @@ class VentaServiceTest {
         assertEquals(1, response.getLineas().size());
         assertEquals(1L, response.getLineas().get(0).getItemId());
 
-        verify(loteRepository, never()).findByInsumoId(any());
+        verify(loteRepository, never()).findByInsumoIdForUpdate(any());
         verify(loteRepository, never()).save(any());
         verify(movimientoRepository, never()).save(any());
     }
@@ -173,7 +173,7 @@ class VentaServiceTest {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(recetaItemRepository.findByItemId(1L)).thenReturn(List.of(recetaItem));
         when(loteRepository.sumCantidadActualByInsumoId(10L)).thenReturn(1.5);
-        when(loteRepository.findByInsumoId(10L)).thenReturn(List.of(lote1, lote2));
+        when(loteRepository.findByInsumoIdForUpdate(10L)).thenReturn(List.of(lote1, lote2));
         when(loteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(movimientoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         stubVentaSave();
@@ -191,7 +191,7 @@ class VentaServiceTest {
         when(recetaItemRepository.findByItemId(1L)).thenReturn(List.of(recetaItem));
         when(loteRepository.sumCantidadActualByInsumoId(10L)).thenReturn(0.04);
         lote.setCantidadActual(0.04);
-        when(loteRepository.findByInsumoId(10L)).thenReturn(List.of(lote));
+        when(loteRepository.findByInsumoIdForUpdate(10L)).thenReturn(List.of(lote));
         when(loteRepository.save(any())).thenReturn(lote);
         when(movimientoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         stubVentaSave();
