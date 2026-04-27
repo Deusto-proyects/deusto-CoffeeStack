@@ -66,6 +66,7 @@ class StockControllerIT {
         lote1.setNumeroLote("LC-001");
         lote1.setCantidadInicial(10.0);
         lote1.setCantidadActual(8.0);
+        lote1.setFechaVencimiento(java.time.LocalDate.now().plusDays(3)); // Lote próximo a caducar
         loteRepository.save(lote1);
 
         Lote lote2 = new Lote();
@@ -124,6 +125,16 @@ class StockControllerIT {
     void getStockByInsumo_notFound_returns404() throws Exception {
         mockMvc.perform(get("/api/stock/insumos/99999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "EMPLEADO")
+    void obtenerInsumos_identificaLotesProximosACaducar() throws Exception {
+        // Historia 7: Verificar que se expone la fecha de caducidad para alertar en el frontend
+        mockMvc.perform(get("/api/stock/insumos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.insumo.nombre=='Café')].lotes[?(@.numeroLote=='LC-001')].fechaVencimiento",
+                        hasItem(java.time.LocalDate.now().plusDays(3).toString())));
     }
 
     @Test
