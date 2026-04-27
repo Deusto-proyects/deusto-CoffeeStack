@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import client, { apiErrorMessage } from '../api/client'
 import PageHeader from '../components/PageHeader'
 import { useAuth } from '../context/AuthContext'
+import { getExpiryStatus } from '../utils/dateUtils'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -165,21 +166,27 @@ export default function Dashboard() {
                     </div>
                   ) : (
                     <ul className="list-group list-group-flush">
-                      {proximosAVencer.map((l) => (
-                        <li
-                          key={l.id}
-                          className="list-group-item d-flex justify-content-between align-items-center"
-                        >
-                          <div>
-                            <strong>{l.insumoNombre}</strong>
-                            <br />
-                            <small className="text-muted">
-                              Lote {l.numeroLote} · {l.cantidadActual} {l.unidad}
-                            </small>
-                          </div>
-                          <span className="badge bg-secondary">{l.fechaVencimiento}</span>
-                        </li>
-                      ))}
+                      {proximosAVencer.map((l) => {
+                        const expiry = getExpiryStatus(l.fechaVencimiento)
+                        
+                        return (
+                          <li
+                            key={l.id}
+                            className={`list-group-item d-flex justify-content-between align-items-center ${expiry.status === 'danger' ? 'list-group-item-danger' : ''}`}
+                          >
+                            <div>
+                              <strong>{l.insumoNombre}</strong>
+                              <br />
+                              <small className={`${expiry.status === 'danger' ? 'text-danger fw-bold' : 'text-muted'}`}>
+                                Lote {l.numeroLote} · {l.cantidadActual} {l.unidad}
+                              </small>
+                            </div>
+                            <span className={`badge bg-${expiry.status !== 'none' ? expiry.status : 'secondary'}`}>
+                              {l.fechaVencimiento}
+                            </span>
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </div>
