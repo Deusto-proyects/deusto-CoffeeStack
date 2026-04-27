@@ -2,6 +2,7 @@ package com.deusto.coffeestack.repository;
 
 import com.deusto.coffeestack.domain.Lote;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,6 +13,11 @@ public interface LoteRepository extends JpaRepository<Lote, Long> {
     /** Returns all batches for a given insumo, ordered by expiry date ascending (nulls last). */
     @Query("SELECT l FROM Lote l WHERE l.insumo.id = :insumoId ORDER BY l.fechaVencimiento ASC NULLS LAST")
     List<Lote> findByInsumoId(@Param("insumoId") Long insumoId);
+
+    /** Used for sales to prevent race conditions when decrementing stock */
+    @Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT l FROM Lote l WHERE l.insumo.id = :insumoId ORDER BY l.fechaVencimiento ASC NULLS LAST")
+    List<Lote> findByInsumoIdForUpdate(@Param("insumoId") Long insumoId);
 
     /** Sums the current quantity across all batches for an insumo. Returns 0.0 if no batches exist. */
     @Query("SELECT COALESCE(SUM(l.cantidadActual), 0.0) FROM Lote l WHERE l.insumo.id = :insumoId")

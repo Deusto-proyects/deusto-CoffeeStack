@@ -93,8 +93,8 @@ public class VentaServiceImpl implements VentaService {
             Long insumoId = entry.getKey();
             double restante = entry.getValue();
 
-            // findByInsumoId ya ordena por fechaVencimiento ASC (FIFO)
-            List<Lote> lotes = loteRepository.findByInsumoId(insumoId);
+            // findByInsumoIdForUpdate usa PESSIMISTIC_WRITE para evitar race conditions
+            List<Lote> lotes = loteRepository.findByInsumoIdForUpdate(insumoId);
 
             for (Lote lote : lotes) {
                 if (restante <= 0) break;
@@ -115,6 +115,12 @@ public class VentaServiceImpl implements VentaService {
                 movimientoRepository.save(mov);
 
                 restante -= descuento;
+            }
+
+            if (restante > 0.001) { // Tolerancia para coma flotante
+                throw new IllegalStateException(String.format(
+                        "Stock insuficiente por concurrencia para el insumo '%s'. Se requerían %.2f más.",
+                        nombreInsumo.get(insumoId), restante));
             }
         }
 
