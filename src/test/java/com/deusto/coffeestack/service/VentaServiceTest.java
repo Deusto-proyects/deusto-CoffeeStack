@@ -186,6 +186,63 @@ class VentaServiceTest {
     }
 
     @Test
+    void registrarVenta_consumeFIFO_capturaMovimientosConCantidadesCorrectas() {
+        // Preparamos dos lotes: el primero vence antes (FIFO) y solo tiene 0.5 kg
+        Lote loteProximo = new Lote();
+        loteProximo.setId(60L);
+        loteProximo.setInsumo(insumo);
+        loteProximo.setNumeroLote("L-FIFO-01");
+        loteProximo.setCantidadInicial(0.5);
+        loteProximo.setCantidadActual(0.5);
+        loteProximo.setFechaVencimiento(LocalDate.now().plusDays(2)); // Vence muy pronto
+
+        Lote loteLejano = new Lote();
+        loteLejano.setId(61L);
+        loteLejano.setInsumo(insumo);
+        loteLejano.setNumeroLote("L-FIFO-02");
+        loteLejano.setCantidadInicial(1.0);
+        loteLejano.setCantidadActual(1.0);
+        loteLejano.setFechaVencimiento(LocalDate.now().plusMonths(12)); // Vence en un año
+
+        // Vendemos 50 unidades: 50 × 0.02 kg = 1.0 kg en total
+        // → debe vaciarse loteProximo (0.5 kg) y descontarse 0.5 kg de loteLejano
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(recetaItemRepository.findByItemId(1L)).thenReturn(List.of(recetaItem));
+        when(loteRepository.sumCantidadActualByInsumoId(10L)).thenReturn(1.5);
+        when(loteRepository.findByInsumoIdForUpdate(10L)).thenReturn(List.of(loteProximo, loteLejano));
+        when(loteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(movimientoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        stubVentaSave();
+
+        service.registrarVenta(buildRequest(1L, 50), "empleado1");
+
+        // Usamos ArgumentCaptor para capturar TODOS los movimientos guardados
+        ArgumentCaptor<MovimientoInventario> captor = ArgumentCaptor.forClass(MovimientoInventario.class);
+        verify(movimientoRepository, times(2)).save(captor.capture());
+
+        List<MovimientoInventario> movimientos = captor.getAllValues();
+
+        // Verificamos el primer movimiento: debe corresponder al lote próximo a vencer
+        MovimientoInventario mov1 = movimientos.get(0);
+        assertEquals("L-FIFO-01", mov1.getLote().getNumeroLote(),
+                "El primer movimiento debe apuntar al lote más próximo a vencer");
+        assertEquals(0.5, mov1.getCantidad(), 0.0001,
+                "Se debe haber descontado exactamente 0.5 kg del primer lote");
+        assertEquals(TipoMovimiento.VENTA, mov1.getTipoMovimiento());
+
+        // Verificamos el segundo movimiento: debe corresponder al lote lejano
+        MovimientoInventario mov2 = movimientos.get(1);
+        assertEquals("L-FIFO-02", mov2.getLote().getNumeroLote(),
+                "El segundo movimiento debe apuntar al lote con más margen");
+        assertEquals(0.5, mov2.getCantidad(), 0.0001,
+                "Se debe haber descontado exactamente 0.5 kg del segundo lote");
+
+        // Verificamos el stock residual de cada lote
+        assertEquals(0.0, loteProximo.getCantidadActual(), 0.0001, "El lote próximo debe quedar vacío");
+        assertEquals(0.5, loteLejano.getCantidadActual(), 0.0001, "El lote lejano debe tener 0.5 kg restantes");
+    }
+
+    @Test
     void registrarVenta_stockExacto_dejaCantidadEnCero() {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(recetaItemRepository.findByItemId(1L)).thenReturn(List.of(recetaItem));
