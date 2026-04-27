@@ -158,6 +158,21 @@ class RecetaServiceTest {
         verify(recetaItemRepository, never()).deleteByItemId(any());
     }
 
+    @Test
+    void definirReceta_conCantidadCeroONegativa_lanzaIllegalArgumentException() {
+        Item item = buildItem(1L, "Café Latte");
+        Insumo insumo = buildInsumo(10L, "Café en grano", true);
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+
+        RecetaRequest request = new RecetaRequest();
+        // Intentamos pasar cantidad -0.5
+        request.setIngredientes(List.of(buildIngrediente(10L, -0.5)));
+
+        assertThrows(IllegalArgumentException.class, () -> service.definirReceta(1L, request));
+        verify(recetaItemRepository, never()).deleteByItemId(any());
+    }
+
     // ---- obtenerReceta ----
 
     @Test

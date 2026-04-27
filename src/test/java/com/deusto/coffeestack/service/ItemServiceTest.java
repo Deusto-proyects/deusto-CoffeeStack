@@ -26,23 +26,31 @@ class ItemServiceTest {
     ItemServiceImpl service;
 
     @Test
-    void create_shouldPersist() {
+    void crearItem_conDatosValidos_guardaExitosamente() {
         ItemCreateRequest req = new ItemCreateRequest();
-        req.setName("Test");
-        req.setDescription("Desc");
+        req.setName("Latte Macchiato");
+        req.setDescription("Delicioso latte");
 
         Item saved = new Item();
-        saved.setId(1L);
-        saved.setName("Test");
-        saved.setDescription("Desc");
+        saved.setId(10L);
+        saved.setName("Latte Macchiato");
+        saved.setDescription("Delicioso latte");
 
         when(repository.save(any(Item.class))).thenReturn(saved);
 
         var response = service.create(req);
 
-        assertEquals(1L, response.getId());
-        assertEquals("Test", response.getName());
-        verify(repository, times(1)).save(any(Item.class));
+        // Verificamos el mock y capturamos el objeto pasado
+        ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
+        verify(repository, times(1)).save(itemCaptor.capture());
+
+        Item capturado = itemCaptor.getValue();
+        assertEquals("Latte Macchiato", capturado.getName());
+        assertEquals("Delicioso latte", capturado.getDescription());
+
+        // Verificamos el objeto devuelto
+        assertEquals(10L, response.getId());
+        assertEquals("Latte Macchiato", response.getName());
     }
 
     @Test

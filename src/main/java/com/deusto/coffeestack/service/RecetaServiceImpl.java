@@ -47,6 +47,9 @@ public class RecetaServiceImpl implements RecetaService {
                 throw new IllegalArgumentException(
                         "El insumo " + ingrediente.getInsumoId() + " aparece más de una vez en la receta");
             }
+            if (ingrediente.getCantidad() <= 0) {
+                throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
+            }
             Insumo insumo = insumoRepository.findById(ingrediente.getInsumoId())
                     .orElseThrow(() -> new NotFoundException(
                             "Insumo no encontrado: " + ingrediente.getInsumoId()));
