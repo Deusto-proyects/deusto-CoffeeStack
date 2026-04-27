@@ -15,8 +15,8 @@ export default function Insumos() {
   async function load() {
     try {
       setLoading(true)
-      const { data } = await client.get('/api/insumos', { params: { size: 100 } })
-      setItems(data.content ?? data)
+      const { data } = await client.get('/api/stock/insumos')
+      setItems(data)
     } catch (err) {
       setError(apiErrorMessage(err))
     } finally {
@@ -38,8 +38,8 @@ export default function Insumos() {
     }
   }
 
-  const filtrados = items.filter((i) =>
-    i.nombre.toLowerCase().includes(search.toLowerCase())
+  const filtrados = items.filter((item) =>
+    item.insumo.nombre.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -99,19 +99,31 @@ export default function Insumos() {
                     <th>Nombre</th>
                     <th>Unidad</th>
                     <th className="text-end">Mínimo alerta</th>
+                    <th className="text-end">Stock Actual</th>
                     <th>Estado</th>
                     <th className="text-end">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtrados.map((i) => (
-                    <tr key={i.id}>
+                  {filtrados.map((item) => {
+                    const i = item.insumo;
+                    const isBajoStock = item.tieneRiesgoFaltante;
+                    return (
+                    <tr key={i.id} className={isBajoStock ? 'table-warning' : ''}>
                       <td className="text-muted">{i.id}</td>
                       <td>
                         <strong>{i.nombre}</strong>
+                        {isBajoStock && (
+                          <span className="badge bg-danger ms-2" title="Stock por debajo del mínimo de alerta">
+                            <i className="bi bi-exclamation-triangle-fill"></i> Bajo stock
+                          </span>
+                        )}
                       </td>
                       <td>{i.unidadMedida}</td>
                       <td className="text-end">{i.stockMinimoAlerta}</td>
+                      <td className={`text-end fw-bold ${isBajoStock ? 'text-danger' : ''}`}>
+                        {item.cantidadTotal}
+                      </td>
                       <td>
                         {i.activo ? (
                           <span className="badge bg-success">Activo</span>
@@ -149,7 +161,7 @@ export default function Insumos() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </table>
             </div>
