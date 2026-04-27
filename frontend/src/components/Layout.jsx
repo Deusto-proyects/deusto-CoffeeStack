@@ -1,9 +1,23 @@
+import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
 export default function Layout() {
   const { user, logout, hasRole } = useAuth()
   const navigate = useNavigate()
+  const [alertasStock, setAlertasStock] = useState(0)
+
+  useEffect(() => {
+    if (user && hasRole('PROPIETARIO', 'ROOT')) {
+      client.get('/api/stock/insumos')
+        .then(res => {
+          const count = res.data.filter(s => s.tieneRiesgoFaltante).length
+          setAlertasStock(count)
+        })
+        .catch(err => console.error("Error al cargar alertas de stock", err))
+    }
+  }, [user, hasRole])
 
   function handleLogout() {
     logout()
@@ -52,7 +66,20 @@ export default function Layout() {
               {navItem('/ventas', 'bi-receipt', 'Ventas')}
               {hasRole('ROOT') && navItem('/usuarios', 'bi-people-fill', 'Usuarios')}
             </ul>
-            <ul className="navbar-nav ms-auto">
+            <ul className="navbar-nav ms-auto align-items-center">
+              {hasRole('PROPIETARIO', 'ROOT') && (
+                <li className="nav-item me-3">
+                  <Link to="/insumos" className="nav-link position-relative p-1" title="Alertas de stock">
+                    <i className="bi bi-bell-fill fs-5"></i>
+                    {alertasStock > 0 && (
+                      <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.65em' }}>
+                        {alertasStock}
+                        <span className="visually-hidden">alertas de stock</span>
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              )}
               <li className="nav-item dropdown">
                 <a
                   className="nav-link dropdown-toggle"
