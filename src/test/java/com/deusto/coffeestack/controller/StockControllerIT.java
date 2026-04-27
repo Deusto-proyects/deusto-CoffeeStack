@@ -4,6 +4,9 @@ import com.deusto.coffeestack.domain.Insumo;
 import com.deusto.coffeestack.domain.Lote;
 import com.deusto.coffeestack.repository.InsumoRepository;
 import com.deusto.coffeestack.repository.LoteRepository;
+import com.deusto.coffeestack.repository.MovimientoInventarioRepository;
+import com.deusto.coffeestack.repository.RecetaItemRepository;
+import com.deusto.coffeestack.repository.VentaLineaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +34,23 @@ class StockControllerIT {
     @Autowired
     LoteRepository loteRepository;
 
+    @Autowired
+    MovimientoInventarioRepository movimientoRepository;
+
+    @Autowired
+    VentaLineaRepository ventaLineaRepository;
+
+    @Autowired
+    RecetaItemRepository recetaItemRepository;
+
     private Long cafeId;
 
     @BeforeEach
     void setUp() {
+        // Borrar tablas dependientes antes de lotes e insumos para respetar FKs
+        movimientoRepository.deleteAll();
+        ventaLineaRepository.deleteAll();
+        recetaItemRepository.deleteAll();
         loteRepository.deleteAll();
         insumoRepository.deleteAll();
 

@@ -1,8 +1,10 @@
 package com.deusto.coffeestack.service;
 
+import com.deusto.coffeestack.domain.TipoMovimiento;
 import com.deusto.coffeestack.dto.AjusteRequest;
 import com.deusto.coffeestack.dto.MovimientoResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -32,4 +34,18 @@ public interface AjusteService {
      * @throws com.deusto.coffeestack.exception.NotFoundException if the insumo does not exist
      */
     List<MovimientoResponse> listarMovimientosPorInsumo(Long insumoId);
+
+    /**
+     * Returns movements filtered by optional criteria, most recent first.
+     *
+     * @param insumoId restrict to a specific insumo (nullable)
+     * @param tipo     restrict to a specific movement type (nullable)
+     * @param desde    lower bound on fechaHora, inclusive (nullable)
+     * @param hasta    upper bound on fechaHora, inclusive (nullable)
+     */
+    List<MovimientoResponse> listarMovimientosFiltrados(
+            Long insumoId,
+            TipoMovimiento tipo,
+            LocalDateTime desde,
+            LocalDateTime hasta);
 }

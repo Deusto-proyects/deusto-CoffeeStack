@@ -20,7 +20,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -55,6 +59,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(fo -> fo.sameOrigin()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -65,6 +70,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/items/**").hasAnyRole("PROPIETARIO", "ROOT")
                     .requestMatchers(HttpMethod.PUT, "/api/items/**").hasAnyRole("PROPIETARIO", "ROOT")
                     .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAnyRole("PROPIETARIO", "ROOT")
+
+                    .requestMatchers(HttpMethod.GET, "/api/items/*/receta").authenticated()
+                    .requestMatchers(HttpMethod.PUT, "/api/items/*/receta").hasAnyRole("PROPIETARIO", "ROOT")
+                    .requestMatchers(HttpMethod.DELETE, "/api/items/*/receta").hasAnyRole("PROPIETARIO", "ROOT")
 
                     .requestMatchers(HttpMethod.GET, "/api/stock/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/stock/**").hasAnyRole("PROPIETARIO", "ROOT")
@@ -83,6 +92,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/lotes/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/lotes/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")
 
+                    // Ventas: registrar → EMPLEADO o superior; consultar → cualquier autenticado
+                    .requestMatchers(HttpMethod.GET, "/api/ventas/**").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/ventas/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")
+
                     // User management → ROOT only
                     .requestMatchers("/api/usuarios/**").hasRole("ROOT")
 
@@ -95,6 +108,25 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://localhost:4173",
+                "http://127.0.0.1:5173"
+        ));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setExposedHeaders(List.of("Authorization"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
     }
 
     @Bean
