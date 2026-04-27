@@ -50,4 +50,27 @@ public class ProveedorController {
                 .created(URI.create("/api/proveedores/" + created.getId()))
                 .body(created);
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('EMPLEADO','PROPIETARIO','ROOT')")
+    @Operation(summary = "Actualizar un proveedor")
+    public ResponseEntity<ProveedorResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ProveedorCreateRequest request) {
+        return ResponseEntity.ok(service.actualizar(id, request));
+    }
+
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('PROPIETARIO','ROOT')")
+    @Operation(summary = "Cambiar estado de un proveedor")
+    public ResponseEntity<Void> cambiarEstado(@PathVariable Long id, @RequestParam boolean activo) {
+        service.cambiarEstado(id, activo);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PROPIETARIO','ROOT')")
+    @Operation(summary = "Eliminar un proveedor")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
 }

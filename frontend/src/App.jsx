@@ -97,6 +97,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="proveedores/:id/editar"
+          element={
+            <ProtectedRoute roles={['EMPLEADO', 'PROPIETARIO', 'ROOT']}>
+              <ProveedorForm />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="ajustes" element={<Ajustes />} />
         <Route

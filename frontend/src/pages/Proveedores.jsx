@@ -2,8 +2,13 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import client, { apiErrorMessage } from '../api/client'
 import PageHeader from '../components/PageHeader'
+import { useAuth } from '../context/AuthContext'
 
 export default function Proveedores() {
+  const { hasRole } = useAuth()
+  const puedeEditar = hasRole('EMPLEADO', 'PROPIETARIO', 'ROOT')
+  const puedeDesactivar = hasRole('PROPIETARIO', 'ROOT')
+  
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -23,6 +28,29 @@ export default function Proveedores() {
   useEffect(() => {
     load()
   }, [])
+
+  async function handleDelete(id, nombre) {
+    if (!window.confirm(`¿Seguro que deseas eliminar permanentemente el proveedor "${nombre}"?`)) return
+    try {
+      await client.delete(`/api/proveedores/${id}`)
+      load()
+    } catch (err) {
+      alert(apiErrorMessage(err))
+    }
+  }
+
+  async function handleToggleStatus(p) {
+    if (!puedeDesactivar) return
+    const newStatus = !p.activo
+    const actionName = newStatus ? 'activar' : 'desactivar'
+    if (!window.confirm(`¿Seguro que deseas ${actionName} el proveedor "${p.nombre}"?`)) return
+    try {
+      await client.patch(`/api/proveedores/${p.id}/estado?activo=${newStatus}`)
+      load()
+    } catch (err) {
+      alert(apiErrorMessage(err))
+    }
+  }
 
   return (
     <div>
@@ -63,6 +91,7 @@ export default function Proveedores() {
                     <th>Email</th>
                     <th>Teléfono</th>
                     <th>Estado</th>
+                    <th className="text-end">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -84,11 +113,36 @@ export default function Proveedores() {
                       </td>
                       <td>{p.telefono || <span className="text-muted">—</span>}</td>
                       <td>
-                        {p.activo ? (
-                          <span className="badge bg-success">Activo</span>
-                        ) : (
-                          <span className="badge bg-secondary">Inactivo</span>
-                        )}
+                        <span 
+                          className={`badge bg-${p.activo ? 'success' : 'secondary'} ${puedeDesactivar ? 'cursor-pointer' : ''}`}
+                          onClick={() => handleToggleStatus(p)}
+                          style={puedeDesactivar ? { cursor: 'pointer' } : {}}
+                          title={puedeDesactivar ? 'Clic para cambiar estado' : ''}
+                        >
+                          {p.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      <td className="text-end">
+                        <div className="btn-group btn-group-sm">
+                          {puedeEditar && (
+                            <Link
+                              to={`/proveedores/${p.id}/editar`}
+                              className="btn btn-outline-coffee"
+                              title="Editar"
+                            >
+                              <i className="bi bi-pencil"></i>
+                            </Link>
+                          )}
+                          {puedeDesactivar && (
+                            <button
+                              className="btn btn-outline-danger"
+                              onClick={() => handleDelete(p.id, p.nombre)}
+                              title="Eliminar"
+                            >
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

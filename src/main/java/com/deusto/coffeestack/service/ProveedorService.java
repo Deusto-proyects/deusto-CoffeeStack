@@ -9,4 +9,7 @@ public interface ProveedorService {
     Page<ProveedorResponse> listar(Pageable pageable);
     ProveedorResponse obtenerPorId(Long id);
     ProveedorResponse crear(ProveedorCreateRequest request);
+    ProveedorResponse actualizar(Long id, ProveedorCreateRequest request);
+    void cambiarEstado(Long id, boolean activo);
+    void eliminar(Long id);
 }

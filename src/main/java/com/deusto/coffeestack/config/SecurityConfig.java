@@ -87,6 +87,9 @@ public class SecurityConfig {
                     // User management → ROOT only (also enforced via @PreAuthorize)
                     .requestMatchers(HttpMethod.GET, "/api/proveedores/**").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/proveedores/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")
+                    .requestMatchers(HttpMethod.PUT, "/api/proveedores/**").hasAnyRole("EMPLEADO", "PROPIETARIO", "ROOT")
+                    .requestMatchers(HttpMethod.PATCH, "/api/proveedores/**").hasAnyRole("PROPIETARIO", "ROOT")
+                    .requestMatchers(HttpMethod.DELETE, "/api/proveedores/**").hasAnyRole("PROPIETARIO", "ROOT")
 
                     // Lotes (batch reception): read → any authenticated; write → EMPLEADO or above
                     .requestMatchers(HttpMethod.GET, "/api/lotes/**").authenticated()

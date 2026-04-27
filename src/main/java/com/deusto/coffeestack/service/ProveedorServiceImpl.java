@@ -50,6 +50,47 @@ public class ProveedorServiceImpl implements ProveedorService {
         return ProveedorMapper.toResponse(repository.save(proveedor));
     }
 
+    @Override
+    @Transactional
+    public ProveedorResponse actualizar(Long id, ProveedorCreateRequest request) {
+        Proveedor proveedor = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Proveedor no encontrado: " + id));
+
+        if (!proveedor.getNombre().equalsIgnoreCase(request.getNombre().trim()) &&
+            repository.existsByNombreIgnoreCase(request.getNombre().trim())) {
+            throw new IllegalArgumentException("Ya existe un proveedor con ese nombre");
+        }
+
+        proveedor.setNombre(request.getNombre().trim());
+        proveedor.setContacto(normalize(request.getContacto()));
+        proveedor.setEmail(normalize(request.getEmail()));
+        proveedor.setTelefono(normalize(request.getTelefono()));
+        
+        return ProveedorMapper.toResponse(repository.save(proveedor));
+    }
+
+    @Override
+    @Transactional
+    public void cambiarEstado(Long id, boolean activo) {
+        Proveedor proveedor = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Proveedor no encontrado: " + id));
+        proveedor.setActivo(activo);
+        repository.save(proveedor);
+    }
+
+    @Override
+    @Transactional
+    public void eliminar(Long id) {
+        Proveedor proveedor = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Proveedor no encontrado: " + id));
+        try {
+            repository.delete(proveedor);
+            repository.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("No se puede eliminar el proveedor porque tiene compras o lotes asociados. En su lugar, puedes desactivarlo.");
+        }
+    }
+
     private String normalize(String value) {
         if (value == null) {
             return null;

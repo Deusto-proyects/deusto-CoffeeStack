@@ -16,4 +16,6 @@ public interface LoteRepository extends JpaRepository<Lote, Long> {
     /** Sums the current quantity across all batches for an insumo. Returns 0.0 if no batches exist. */
     @Query("SELECT COALESCE(SUM(l.cantidadActual), 0.0) FROM Lote l WHERE l.insumo.id = :insumoId")
     double sumCantidadActualByInsumoId(@Param("insumoId") Long insumoId);
+
+    boolean existsByProveedorId(Long proveedorId);
 }
