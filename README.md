@@ -1,134 +1,171 @@
-# Sistema de Gestión de Inventario
+# CoffeeStack — Sistema de Gestión de Inventario
 
-## 1. Descripción General
-Este proyecto desarrolla un sistema de gestión de inventario orientado a controlar insumos, lotes, stock, mermas, ventas y reposición mediante una evolución incremental por sprints.
+Sistema de gestión de inventario para cafeterías, desarrollado como proyecto académico de la asignatura **Proceso de Software y Calidad 2025-26 (Universidad de Deusto)**.
 
-El trabajo se enmarca en la asignatura **Proceso de Software y Calidad 2025-26**, cumpliendo los requisitos académicos de arquitectura por capas, metodología SCRUM, planificación iterativa y gestión formal del Product Backlog.
+Permite controlar insumos, lotes, stock, mermas y roturas mediante una API REST con autenticación JWT y control de acceso por roles.
 
-El objetivo del sistema es disponer de una solución cliente-servidor que permita:
-- Operación base del inventario con control de acceso por roles.
-- Automatización del descuento de stock a partir de ventas y recetas, incluyendo FEFO.
-- Soporte a decisiones mediante alertas, sugerencias de compra, forecast y reportes exportables.
+## Stack tecnológico
 
-## 2. Arquitectura del Sistema
-La solución se plantea con arquitectura **cliente-servidor** separando responsabilidades funcionales y técnicas.
+- **Java 21** + **Spring Boot 3.2.5**
+- **Spring Security** + JWT (JJWT 0.12.3)
+- **Spring Data JPA** + Hibernate + **Flyway** (migraciones)
+- **MySQL** (producción/dev) · **H2** (local/tests)
+- **SpringDoc OpenAPI** (Swagger UI en `/swagger-ui/index.html`)
 
-### Capa de datos
-Responsable de la persistencia de entidades clave del dominio de inventario (insumos, lotes, movimientos, ventas, mermas, etc.).
+## Compilación y ejecución
 
-### Servidor (API REST)
-Implementa la lógica de negocio y expone servicios REST para operación, validación de reglas y automatizaciones del dominio.
+### Requisitos previos
 
-### Cliente
-Interfaz de usuario (web o escritorio) para consumo de la API, ejecución de flujos operativos y visualización de resultados.
+- Java 21+
+- No es necesario instalar Gradle; el proyecto incluye el wrapper `./gradlew`
 
-### Justificación tecnológica (Java + Spring Boot)
-La elección de **Java + Spring Boot** responde a:
-- Adecuación al modelo API REST requerido.
-- Soporte sólido para separación por capas y mantenibilidad.
-- Ecosistema maduro para validación, seguridad, pruebas e integración.
+### Compilar
 
-## 3. Metodología de Trabajo
-El proyecto se gestiona con **SCRUM**, aplicando planificación iterativa, revisión incremental y mejora continua.
+```bash
+./gradlew build
+```
 
-### Roles definidos
-- **Product Owner:** responsable de la visión de producto, priorización y gestión del backlog. Durante la planificación inicial fue asumido por el autor del trabajo; la gestión se indica a cargo de Pablo Romero.
-- **Scrum Master:** facilitación de ceremonias, seguimiento y gestión de bloqueos; rol rotado entre miembros del equipo.
-- **Developers:** implementación técnica y aseguramiento de calidad del incremento.
+### Ejecutar en local (H2 en memoria, sin base de datos externa)
 
-### Gestión de trabajo con GitHub Projects
-Se utiliza **GitHub Projects** como soporte operativo de SCRUM para organizar historias, seguimiento por sprint y trazabilidad de prioridades.
+```bash
+./gradlew bootRun
+```
 
-### Organización temporal
-- 3 sprints de aproximadamente 12 días.
-- Referencia de trabajo con **Ideal Day ~1 h/día por persona** dentro de la capacidad académica definida.
+La aplicación arranca en `http://localhost:8080`.
+Consola H2 disponible en `http://localhost:8080/h2-console`.
 
-## 4. Planificación de Sprints
-| Sprint | Fechas | Objetivo | Historias incluidas | Criterios de validación |
-|--------|--------|----------|---------------------|--------------------------|
-| **Sprint 1** | 9–25 marzo<br>(Review 26 marzo) | Inventario base operable con acceso por roles | CORE-01 a CORE-08<br>ADM-02 | Alta de insumos<br>Registro de lote<br>Consulta de stock<br>Registro de merma con login |
-| **Sprint 2** | 13–28 abril<br>(Review 29 abril) | Registro de ventas y descuento automático de inventario + alertas | CORE-09 a CORE-13<br>INT-01, INT-02 | Venta con descuento por receta/FEFO<br>Alertas de stock<br>Alertas de caducidad |
-| **Sprint 3** | 4–18 mayo<br>(Review 19 mayo) | Reposición automática, pronóstico y reportes exportables | INT-03 a INT-05<br>ADM-01, ADM-03<br>REP-01 a REP-04 | Sugerencia de compra<br>Forecast SES<br>Reportes<br>Exportación CSV |
+### Ejecutar con perfil dev (MySQL local)
 
-## 5. Product Backlog
-El Product Backlog se estructura mediante historias de usuario con identificador funcional y criterios de negocio.
+```bash
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
 
-### Formato de historias
-Cada historia incluye al menos:
-- Identificador (por ejemplo, `CORE-01`, `INT-03`, `ADM-02`, `REP-01`).
-- Descripción funcional.
-- Prioridad (`Alta`, `Media`, `Baja`).
-- Estimación en horas.
+Variables de entorno necesarias (o usa los valores por defecto):
 
-### Priorización (PB Priority)
-La priorización se aplica para maximizar valor y reducir riesgo técnico:
-- Primero capacidades troncales de inventario.
-- Después automatización operativa (ventas, alertas).
-- Finalmente capacidades analíticas y de soporte a decisión.
+| Variable | Default |
+|----------|---------|
+| `DB_USER` | `root` |
+| `DB_PASS` | `password` |
 
-### Organización por etiquetas
-- `CORE`: funcionalidades nucleares del inventario.
-- `INT`: automatizaciones e inteligencia operativa.
-- `ADM`: capacidades administrativas y de gestión.
-- `REP`: reporting y exportación.
+La base de datos debe existir: `coffeestack` en `localhost:3306`.
 
-## 6. Gestión del Tiempo
-La dedicación total prevista es de **50 h por persona**.
+### Ejecutar en producción
 
-| Bloque | Horas por persona |
-|---|---:|
-| Definición de alcance y backlog inicial | 2,5 h |
-| Sprint Planning (1,5 h × 3) | 4,5 h |
-| Retrospectivas (0,5 h × 3) | 1,5 h |
-| Reuniones con profesor (inicial + 3 reviews) | 1,5 h |
-| Desarrollo | 40 h |
-| **Total** | **50 h** |
+```bash
+java -jar build/libs/coffeestack-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
 
-### Justificación de capacidad por sprint
-- La capacidad de desarrollo se distribuye en tres iteraciones: ~13,33 h por sprint por persona.
-- El backlog estimado suma ~80 h de equipo.
-- Con 3 personas, la carga estimada de desarrollo por persona ronda 27 h, dejando margen para integración, pruebas, documentación e incidencias dentro de las 40 h disponibles de desarrollo.
+Variables de entorno requeridas: `DB_URL`, `DB_USER`, `DB_PASS`.
 
-### Relación entre estimación y planificación
-La planificación mantiene coherencia entre esfuerzo estimado y capacidad real, reservando margen explícito para tareas transversales y riesgo técnico, de acuerdo con el contexto académico.
+### Ejecutar los tests
 
-## 7. Instalación y Ejecución
-### Requisitos
-- Java (versión compatible con Spring Boot del proyecto).
-- Herramienta de construcción Java (según configuración final del backend).
-- Entorno de ejecución para cliente web o escritorio (según implementación final).
+```bash
+./gradlew test
+```
 
-### Backend
-En el estado actual del repositorio no se han publicado todavía los artefactos de implementación del servidor ni su configuración ejecutable.
+Los tests usan H2 en memoria automáticamente (perfil `test`).
 
-### Cliente
-En el estado actual del repositorio no se han publicado todavía los artefactos de implementación del cliente ni sus scripts de ejecución.
+## Roles del sistema
 
-## 8. Organización del Repositorio
-Estado actual detectado del repositorio:
+| Rol | Permisos |
+|-----|----------|
+| `EMPLEADO` | Consultar stock, registrar lotes |
+| `PROPIETARIO` | Todo lo anterior + gestionar insumos, registrar ajustes/mermas |
+| `ROOT` | Acceso total, gestión de usuarios |
 
-| Ruta | Contenido |
-|---|---|
-| `planificacion.md` | Documento de planificación Scrum, esfuerzo y organización de sprints |
-| `README.md` | Documentación general del proyecto |
+## API REST
 
-### Ubicación de backend y frontend
-A la fecha de esta versión del README no existen aún carpetas de código para backend/frontend en el repositorio público. Su ubicación se definirá al incorporar la implementación de los incrementos.
+Documentación interactiva completa en `http://localhost:8080/swagger-ui/index.html`.
 
-### Configuración relevante
-La configuración operativa detallada (variables de entorno, perfiles, puertos, base de datos, build y despliegue) se añadirá junto con el código fuente en los sprints correspondientes.
+Todas las rutas protegidas requieren cabecera `Authorization: Bearer <token>`.
 
-## 9. Estado Actual del Proyecto
-### Implementación por sprint
-- **Sprint 1:** definido a nivel de planificación funcional (inventario base y acceso por roles).
-- **Sprint 2:** definido a nivel de planificación funcional (ventas, descuento automático, alertas).
-- **Sprint 3:** definido a nivel de planificación funcional (reposición, forecast, reportes y CSV).
+### Auth — `/api/auth`
 
-### Situación actual del repositorio
-El repositorio contiene actualmente documentación de planificación; la implementación técnica no está aún incorporada en esta versión.
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `POST` | `/api/auth/login` | Público | Obtener token JWT |
+| `POST` | `/api/auth/register` | Público | Registrar nuevo usuario |
+| `GET` | `/api/auth/me` | Autenticado | Datos del usuario actual |
 
-### Próximas mejoras
-- Incorporar estructura base de arquitectura cliente-servidor.
-- Publicar backend API REST en Spring Boot con modelo de datos inicial.
-- Publicar cliente y flujos de validación por sprint.
-- Añadir guía de ejecución y despliegue cuando exista código funcional.
+### Insumos — `/api/insumos`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `GET` | `/api/insumos` | Autenticado | Listar insumos (paginado) |
+| `GET` | `/api/insumos/{id}` | Autenticado | Detalle de un insumo |
+| `POST` | `/api/insumos` | PROPIETARIO/ROOT | Crear insumo |
+| `PUT` | `/api/insumos/{id}` | PROPIETARIO/ROOT | Editar insumo |
+| `DELETE` | `/api/insumos/{id}` | PROPIETARIO/ROOT | Desactivar insumo (soft delete) |
+
+### Lotes — `/api/lotes`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `POST` | `/api/lotes` | EMPLEADO+ | Registrar recepción de lote |
+| `GET` | `/api/lotes/insumo/{insumoId}` | Autenticado | Lotes de un insumo |
+| `GET` | `/api/lotes/{id}` | Autenticado | Detalle de un lote |
+
+### Stock — `/api/stock`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `GET` | `/api/stock/insumos` | Autenticado | Resumen de stock de todos los insumos |
+| `GET` | `/api/stock/insumos/{id}` | Autenticado | Stock detallado de un insumo (con lotes) |
+
+### Ajustes — `/api/ajustes`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `POST` | `/api/ajustes` | PROPIETARIO/ROOT | Registrar merma, rotura o ajuste manual |
+| `GET` | `/api/ajustes` | Autenticado | Historial completo de movimientos |
+| `GET` | `/api/ajustes/insumo/{insumoId}` | Autenticado | Movimientos de un insumo concreto |
+
+### Proveedores — `/api/proveedores`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `GET` | `/api/proveedores` | Autenticado | Listar proveedores |
+| `GET` | `/api/proveedores/{id}` | Autenticado | Detalle de un proveedor |
+| `POST` | `/api/proveedores` | EMPLEADO+ | Crear proveedor |
+
+### Usuarios — `/api/usuarios`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `POST` | `/api/usuarios` | ROOT | Crear usuario |
+| `GET` | `/api/usuarios` | ROOT | Listar usuarios |
+| `DELETE` | `/api/usuarios/{id}` | ROOT | Desactivar usuario |
+
+### Items — `/api/items`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `GET` | `/api/items` | Autenticado | Listar ítems (paginado) |
+| `GET` | `/api/items/{id}` | Autenticado | Detalle de un ítem |
+| `POST` | `/api/items` | PROPIETARIO/ROOT | Crear ítem |
+| `PUT` | `/api/items/{id}` | PROPIETARIO/ROOT | Editar ítem |
+| `DELETE` | `/api/items/{id}` | PROPIETARIO/ROOT | Eliminar ítem |
+
+## Estructura del proyecto
+
+```
+src/main/java/com/deusto/coffeestack/
+├── controller/      REST endpoints
+├── service/         Lógica de negocio
+├── repository/      Acceso a datos (JPA)
+├── domain/          Entidades JPA
+├── dto/             Objetos de transferencia
+├── security/        Filtro JWT
+└── config/          Seguridad, OpenAPI, inicialización de datos
+src/main/resources/
+├── application.yml               Configuración multi-perfil (local/dev/prod)
+└── db/migration/                 Scripts Flyway (V1–V6)
+```
+
+## Planificación de sprints
+
+| Sprint | Fechas | Objetivo |
+|--------|--------|----------|
+| 1 | 9–25 marzo | Inventario base, roles, login |
+| 2 | 13–28 abril | Ventas, descuento automático FEFO, alertas |
+| 3 | 4–18 mayo | Reposición, forecast SES, reportes CSV |
