@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import client, { apiErrorMessage } from '../api/client'
 import PageHeader from '../components/PageHeader'
+import { getExpiryStatus } from '../utils/dateUtils'
 
 export default function Lotes() {
   const [insumos, setInsumos] = useState([])
@@ -97,23 +98,40 @@ export default function Lotes() {
                   </tr>
                 </thead>
                 <tbody>
-                  {lotes.map((l) => (
-                    <tr key={l.id}>
-                      <td>
-                        <strong>{l.numeroLote}</strong>
-                      </td>
-                      <td>{l.proveedorNombre || <span className="text-muted">—</span>}</td>
-                      <td className="text-end">{l.cantidadInicial}</td>
-                      <td className="text-end">
-                        <strong>{l.cantidadActual}</strong>
-                      </td>
-                      <td>
-                        {l.fechaVencimiento || (
-                          <span className="text-muted">sin fecha</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {lotes.map((l) => {
+                    const expiry = getExpiryStatus(l.fechaVencimiento)
+                    const isAlert = expiry.status === 'danger' || expiry.status === 'warning'
+                    
+                    return (
+                      <tr key={l.id} className={expiry.status === 'danger' ? 'table-danger-subtle' : ''}>
+                        <td>
+                          <strong>{l.numeroLote}</strong>
+                        </td>
+                        <td>{l.proveedorNombre || <span className="text-muted">—</span>}</td>
+                        <td className="text-end">{l.cantidadInicial}</td>
+                        <td className="text-end">
+                          <strong>{l.cantidadActual}</strong>
+                        </td>
+                        <td>
+                          {l.fechaVencimiento ? (
+                            <div className="d-flex align-items-center gap-2">
+                              <span className={isAlert ? `text-${expiry.status} fw-bold` : ''}>
+                                {l.fechaVencimiento}
+                              </span>
+                              {isAlert && (
+                                <span className={`badge bg-${expiry.status}`} title={expiry.message}>
+                                  <i className="bi bi-exclamation-triangle-fill me-1"></i>
+                                  {expiry.status === 'danger' ? 'Crítico' : 'Próximo'}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted">sin fecha</span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
