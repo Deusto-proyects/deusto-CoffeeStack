@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.5'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'jacoco'
+    id 'io.gatling.gradle' version '3.9.5.6'
 }
 
 group = 'com.deusto'
@@ -35,6 +36,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     runtimeOnly 'com.h2database:h2'
+
+    gatlingImplementation 'io.gatling.highcharts:gatling-charts-highcharts:3.9.5'
 }
 
 tasks.named('test') {
