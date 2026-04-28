@@ -146,6 +146,22 @@ Todas las rutas protegidas requieren cabecera `Authorization: Bearer <token>`.
 | `PUT` | `/api/items/{id}` | PROPIETARIO/ROOT | Editar ítem |
 | `DELETE` | `/api/items/{id}` | PROPIETARIO/ROOT | Eliminar ítem |
 
+### Recetas — `/api/items/{itemId}/receta`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `GET` | `/api/items/{itemId}/receta` | Autenticado | Consultar receta de un ítem |
+| `PUT` | `/api/items/{itemId}/receta` | PROPIETARIO/ROOT | Crear o actualizar la receta (insumos y cantidades) |
+| `DELETE` | `/api/items/{itemId}/receta` | PROPIETARIO/ROOT | Eliminar la receta |
+
+### Ventas — `/api/ventas`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `POST` | `/api/ventas` | EMPLEADO+ | Registrar una venta y descontar inventario automáticamente (FIFO) |
+| `GET` | `/api/ventas` | Autenticado | Listar ventas registradas |
+| `GET` | `/api/ventas/{id}` | Autenticado | Detalle de una venta con sus líneas |
+
 ## Estructura del proyecto
 
 ```
@@ -164,8 +180,36 @@ src/main/resources/
 
 ## Planificación de sprints
 
-| Sprint | Fechas | Objetivo |
-|--------|--------|----------|
-| 1 | 9–25 marzo | Inventario base, roles, login |
-| 2 | 13–28 abril | Ventas, descuento automático FEFO, alertas |
-| 3 | 4–18 mayo | Reposición, forecast SES, reportes CSV |
+| Sprint | Fechas | Objetivo | Estado |
+|--------|--------|----------|--------|
+| 1 | 9–25 marzo | Inventario base, roles, login | Completado |
+| 2 | 13–28 abril | Ventas, descuento automático FIFO, alertas, CI | Completado |
+| 3 | 4–18 mayo | Reposición, forecast SES, reportes CSV | Pendiente |
+
+## Sprint 2 — Entregables (13–28 abril)
+
+### Historias de usuario completadas
+
+- **CORE-10** — *Como propietario quiero poder definir recetas (insumos y cantidades) por producto para descontar automáticamente inventario al vender.*
+  - Entidad `Receta` y endpoints `/api/items/{itemId}/receta`.
+- **HU-13 / Ventas** — *Como empleado quiero registrar una venta y que el inventario se descuente automáticamente.*
+  - Entidades `Venta` y `VentaLinea`, servicio con lógica **FIFO**, controlador `/api/ventas` y nuevo tipo `VENTA` en `TipoMovimiento`.
+- **Alertas de caducidad** — *Como propietario quiero ver alertas de lotes próximos a caducar para priorizar su uso y reducir merma.*
+- **Frontend de ventas** — Página `Ventas` con lista, detalle y formulario dinámico para registrar nuevas ventas; integrada en la barra de navegación.
+
+### Calidad y procesos
+
+- **Tests unitarios y de integración** separados en Gradle:
+  - `./gradlew test` ejecuta unitarios.
+  - `./gradlew integrationTest` ejecuta los `*IT`.
+  - `./gradlew build` y `./gradlew check` ejecutan ambos.
+- **Mockito** incorporado para tests con dobles de prueba.
+- **JaCoCo** para informes de cobertura (`build/reports/jacoco/test/html/index.html`).
+- **SLF4J** sustituyendo `System.out.println` en el código de producción.
+
+### Integración Continua
+
+- Workflow de **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) con dos jobs:
+  - `build-backend`: compila el backend con JDK 21 y ejecuta `./gradlew build` (tests unitarios + integración).
+  - `build-frontend`: instala dependencias y compila el proyecto React con Node 20.
+- Se dispara en cada `push` y `pull_request` sobre `main` / `master`.
