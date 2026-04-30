@@ -21,6 +21,24 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    integrationTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+    performanceTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+    performanceTestImplementation.extendsFrom testImplementation
+    performanceTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -40,26 +58,35 @@ dependencies {
     gatlingImplementation 'io.gatling.highcharts:gatling-charts-highcharts:3.9.5'
 }
 
+// Tests unitarios: src/test/java, patrón *Test.java
 tasks.named('test') {
     useJUnitPlatform()
-    // Excluir tests de integración de la tarea test normal
-    exclude '**/*IT.class'
 }
 
-// Tarea dedicada para tests de integración
-task integrationTest(type: Test) {
+// Tests de integración: src/integrationTest/java, patrón *IT.java
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests (*IT.java).'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
     useJUnitPlatform()
-    // Incluir solo los tests de integración
-    include '**/*IT.class'
-    
-    // Ejecutar después de los unitarios
     shouldRunAfter test
 }
 
-// Hacer que ./gradlew build o check también lance los de integración
+// Tests de rendimiento: src/performanceTest/java, patrón *PerfTest.java
+tasks.register('performanceTest', Test) {
+    description = 'Runs performance tests (*PerfTest.java).'
+    group = 'verification'
+    testClassesDirs = sourceSets.performanceTest.output.classesDirs
+    classpath = sourceSets.performanceTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter integrationTest
+}
+
+// 'check' encadena unitarios + integración. Rendimiento queda fuera (es pesado, se lanza a mano).
 check.dependsOn integrationTest
 
-// JaCoCo: generar informe de cobertura tras los tests
+// JaCoCo: cobertura tras los tests unitarios
 jacocoTestReport {
     dependsOn test
     reports {
@@ -68,5 +95,3 @@ jacocoTestReport {
     }
 }
 check.dependsOn jacocoTestReport
-
-
