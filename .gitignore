@@ -28,3 +28,4 @@ Thumbs.db
 
 # Logs
 *.log
+performance/jmeter/coffeestack-load-test.jmx
