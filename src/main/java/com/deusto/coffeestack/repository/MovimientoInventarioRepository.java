@@ -47,4 +47,25 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
             @Param("tipo") TipoMovimiento tipo,
             @Param("desde") LocalDateTime desde,
             @Param("hasta") LocalDateTime hasta);
+
+    /**
+     * Returns the movements that reduce stock (VENTA, MERMA, ROTURA, AJUSTE_NEGATIVO)
+     * for a given insumo within the [desde, hasta] window.
+     *
+     * <p>Used to compute average daily consumption without loading the full
+     * movement history into memory.
+     */
+    @Query("SELECT m FROM MovimientoInventario m WHERE " +
+           "m.lote.insumo.id = :insumoId AND " +
+           "m.tipoMovimiento IN (" +
+           "  com.deusto.coffeestack.domain.TipoMovimiento.VENTA, " +
+           "  com.deusto.coffeestack.domain.TipoMovimiento.MERMA, " +
+           "  com.deusto.coffeestack.domain.TipoMovimiento.ROTURA, " +
+           "  com.deusto.coffeestack.domain.TipoMovimiento.AJUSTE_NEGATIVO" +
+           ") AND " +
+           "m.fechaHora BETWEEN :desde AND :hasta")
+    List<MovimientoInventario> findMovimientosSalidaByInsumoAndRango(
+            @Param("insumoId") Long insumoId,
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
 }
