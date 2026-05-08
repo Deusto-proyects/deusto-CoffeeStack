@@ -57,6 +57,14 @@ public class VentaController {
                 .body(response);
     }
 
+    /** Genera el reporte simple de ventas por día y por producto para análisis de demanda. */
+    @GetMapping("/reporte")
+    @PreAuthorize("hasAnyRole('PROPIETARIO', 'ROOT')")
+    @Operation(summary = "Obtener reporte de ventas por día y producto")
+    public List<com.deusto.coffeestack.dto.ReporteVentasDTO> obtenerReporte() {
+        return ventaService.obtenerReporteVentas();
+    }
+
     /** Devuelve todas las ventas registradas, de más reciente a más antigua. */
     @GetMapping
     @PreAuthorize("isAuthenticated()")

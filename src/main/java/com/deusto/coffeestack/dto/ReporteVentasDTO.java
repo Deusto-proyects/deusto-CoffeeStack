@@ -10,6 +10,12 @@ public class ReporteVentasDTO {
     public ReporteVentasDTO() {
     }
 
+    public ReporteVentasDTO(java.sql.Date fecha, String nombreProducto, Long cantidadTotal) {
+        this.fecha = fecha != null ? fecha.toLocalDate() : null;
+        this.nombreProducto = nombreProducto;
+        this.cantidadTotal = cantidadTotal;
+    }
+
     public ReporteVentasDTO(LocalDate fecha, String nombreProducto, Long cantidadTotal) {
         this.fecha = fecha;
         this.nombreProducto = nombreProducto;
