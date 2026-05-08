@@ -1,5 +1,6 @@
 package com.deusto.coffeestack.service;
 
+import com.deusto.coffeestack.dto.ReporteVentasDTO;
 import com.deusto.coffeestack.dto.VentaRequest;
 import com.deusto.coffeestack.dto.VentaResponse;
 
@@ -27,4 +28,7 @@ public interface VentaService {
 
     /** Devuelve el detalle de una venta por su id. */
     VentaResponse obtenerVenta(Long id);
+
+    /** Genera un reporte agregado de ventas por día y producto. */
+    List<ReporteVentasDTO> obtenerReporteVentas();
 }

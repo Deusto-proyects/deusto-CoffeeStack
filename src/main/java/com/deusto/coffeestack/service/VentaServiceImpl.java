@@ -166,6 +166,12 @@ public class VentaServiceImpl implements VentaService {
         return toResponse(venta);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReporteVentasDTO> obtenerReporteVentas() {
+        return ventaLineaRepository.getReporteVentasDiarias();
+    }
+
     // ---- helpers ----
 
     private VentaResponse toResponse(Venta venta) {
