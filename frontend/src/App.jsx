@@ -18,6 +18,7 @@ import ProveedorForm from './pages/ProveedorForm'
 import Ajustes from './pages/Ajustes'
 import AjusteForm from './pages/AjusteForm'
 import HistorialMovimientos from './pages/HistorialMovimientos'
+import EstimacionConsumo from './pages/EstimacionConsumo'
 import Usuarios from './pages/Usuarios'
 import UsuarioForm from './pages/UsuarioForm'
 import Ventas from './pages/Ventas'
@@ -121,6 +122,15 @@ export default function App() {
           element={
             <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
               <HistorialMovimientos />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="estimacion-consumo"
+          element={
+            <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
+              <EstimacionConsumo />
             </ProtectedRoute>
           }
         />
