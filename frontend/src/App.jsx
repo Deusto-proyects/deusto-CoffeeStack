@@ -161,6 +161,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="usuarios/:id/editar"
+          element={
+            <ProtectedRoute roles={['ROOT']}>
+              <UsuarioForm />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="ventas" element={<Ventas />} />
         <Route

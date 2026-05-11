@@ -1,14 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import client, { apiErrorMessage } from '../api/client'
 import PageHeader from '../components/PageHeader'
 import { useAuth } from '../context/AuthContext'
+
+function formatFecha(iso) {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleString()
+}
 
 export default function Usuarios() {
   const { user: currentUser } = useAuth()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [filtro, setFiltro] = useState('activos') // activos | inactivos | todos
 
   async function load() {
     try {
@@ -26,6 +34,12 @@ export default function Usuarios() {
     load()
   }, [])
 
+  const usersFiltrados = useMemo(() => {
+    if (filtro === 'activos') return users.filter((u) => u.activo)
+    if (filtro === 'inactivos') return users.filter((u) => !u.activo)
+    return users
+  }, [users, filtro])
+
   async function cambiarRol(id, nuevoRol) {
     try {
       await client.patch(`/api/usuarios/${id}/rol`, { rol: nuevoRol })
@@ -39,6 +53,15 @@ export default function Usuarios() {
     if (!window.confirm(`¿Desactivar al usuario "${username}"?`)) return
     try {
       await client.delete(`/api/usuarios/${id}`)
+      load()
+    } catch (err) {
+      alert(apiErrorMessage(err))
+    }
+  }
+
+  async function activar(id) {
+    try {
+      await client.patch(`/api/usuarios/${id}/activar`)
       load()
     } catch (err) {
       alert(apiErrorMessage(err))
@@ -62,14 +85,42 @@ export default function Usuarios() {
 
       <div className="card">
         <div className="card-body">
+          <div className="d-flex align-items-center mb-3">
+            <label className="me-2 mb-0 fw-bold">Mostrar:</label>
+            <div className="btn-group btn-group-sm" role="group">
+              <button
+                type="button"
+                className={`btn ${filtro === 'activos' ? 'btn-coffee' : 'btn-outline-coffee'}`}
+                onClick={() => setFiltro('activos')}
+              >
+                Activos
+              </button>
+              <button
+                type="button"
+                className={`btn ${filtro === 'inactivos' ? 'btn-coffee' : 'btn-outline-coffee'}`}
+                onClick={() => setFiltro('inactivos')}
+              >
+                Inactivos
+              </button>
+              <button
+                type="button"
+                className={`btn ${filtro === 'todos' ? 'btn-coffee' : 'btn-outline-coffee'}`}
+                onClick={() => setFiltro('todos')}
+              >
+                Todos
+              </button>
+            </div>
+            <span className="ms-3 text-muted small">{usersFiltrados.length} usuario(s)</span>
+          </div>
+
           {loading ? (
             <div className="text-center py-4">
               <div className="spinner-border text-coffee"></div>
             </div>
-          ) : users.length === 0 ? (
+          ) : usersFiltrados.length === 0 ? (
             <div className="empty-state">
               <i className="bi bi-people fs-1"></i>
-              <p className="mt-2 mb-0">No hay usuarios.</p>
+              <p className="mt-2 mb-0">No hay usuarios en esta vista.</p>
             </div>
           ) : (
             <div className="table-responsive">
@@ -80,11 +131,13 @@ export default function Usuarios() {
                     <th>Usuario</th>
                     <th>Rol</th>
                     <th>Estado</th>
+                    <th>Creado</th>
+                    <th>Actualizado</th>
                     <th className="text-end">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => {
+                  {usersFiltrados.map((u) => {
                     const esActual = u.username === currentUser?.username
                     return (
                       <tr key={u.id}>
@@ -103,15 +156,34 @@ export default function Usuarios() {
                             <span className="badge bg-secondary">Inactivo</span>
                           )}
                         </td>
+                        <td className="small text-muted">
+                          {formatFecha(u.createdAt)}
+                          {u.createdBy && (
+                            <div><i className="bi bi-person me-1"></i>{u.createdBy}</div>
+                          )}
+                        </td>
+                        <td className="small text-muted">
+                          {formatFecha(u.updatedAt)}
+                          {u.updatedBy && (
+                            <div><i className="bi bi-person me-1"></i>{u.updatedBy}</div>
+                          )}
+                        </td>
                         <td className="text-end">
                           <div className="btn-group btn-group-sm">
+                            <Link
+                              to={`/usuarios/${u.id}/editar`}
+                              className="btn btn-outline-coffee"
+                              title="Editar"
+                            >
+                              <i className="bi bi-pencil"></i>
+                            </Link>
                             <div className="dropdown">
                               <button
                                 className="btn btn-outline-coffee dropdown-toggle"
                                 data-bs-toggle="dropdown"
                                 disabled={esActual}
                               >
-                                <i className="bi bi-arrow-repeat me-1"></i>Cambiar rol
+                                <i className="bi bi-arrow-repeat me-1"></i>Rol
                               </button>
                               <ul className="dropdown-menu">
                                 {['ROOT', 'PROPIETARIO', 'EMPLEADO']
@@ -128,13 +200,24 @@ export default function Usuarios() {
                                   ))}
                               </ul>
                             </div>
-                            <button
-                              className="btn btn-outline-danger ms-1"
-                              onClick={() => desactivar(u.id, u.username)}
-                              disabled={esActual || !u.activo}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </button>
+                            {u.activo ? (
+                              <button
+                                className="btn btn-outline-danger"
+                                onClick={() => desactivar(u.id, u.username)}
+                                disabled={esActual}
+                                title="Desactivar"
+                              >
+                                <i className="bi bi-person-x"></i>
+                              </button>
+                            ) : (
+                              <button
+                                className="btn btn-outline-success"
+                                onClick={() => activar(u.id)}
+                                title="Activar"
+                              >
+                                <i className="bi bi-person-check"></i>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
