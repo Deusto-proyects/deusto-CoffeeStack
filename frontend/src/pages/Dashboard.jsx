@@ -6,21 +6,27 @@ import { useAuth } from '../context/AuthContext'
 import { getExpiryStatus } from '../utils/dateUtils'
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user, hasRole } = useAuth()
   const [stock, setStock] = useState([])
   const [movimientos, setMovimientos] = useState([])
+  const [cobertura, setCobertura] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   async function load() {
     try {
       setLoading(true)
-      const [{ data: s }, { data: m }] = await Promise.all([
+      const requests = [
         client.get('/api/stock/insumos'),
         client.get('/api/ajustes'),
-      ])
+      ]
+      if (hasRole('PROPIETARIO', 'ROOT')) {
+        requests.push(client.get('/api/stock/cobertura', { params: { ventana: 30 } }))
+      }
+      const [{ data: s }, { data: m }, coberturaRes] = await Promise.all(requests)
       setStock(s)
       setMovimientos(m)
+      if (coberturaRes) setCobertura(coberturaRes.data)
     } catch (err) {
       setError(apiErrorMessage(err))
     } finally {
@@ -110,6 +116,56 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
+          {/* Tarjeta de riesgos de cobertura – solo PROPIETARIO/ROOT */}
+          {hasRole('PROPIETARIO', 'ROOT') && cobertura.length > 0 && (() => {
+            const criticos = cobertura.filter(r => r.nivelRiesgo === 'CRITICO')
+            const bajos    = cobertura.filter(r => r.nivelRiesgo === 'BAJO')
+            return (
+              <div className="card mb-4">
+                <div className="card-header">
+                  <i className="bi bi-shield-exclamation me-2"></i>
+                  Riesgos operativos — días de cobertura
+                  <Link to="/cobertura-insumos" className="btn btn-sm btn-outline-coffee float-end">
+                    Ver detalle <i className="bi bi-arrow-right"></i>
+                  </Link>
+                </div>
+                <div className="card-body">
+                  {criticos.length === 0 && bajos.length === 0 ? (
+                    <div className="d-flex align-items-center gap-2 text-success">
+                      <i className="bi bi-check-circle-fill fs-4"></i>
+                      <span>Todos los insumos tienen cobertura suficiente (≥ 7 días).</span>
+                    </div>
+                  ) : (
+                    <div className="d-flex flex-wrap gap-3">
+                      {criticos.length > 0 && (
+                        <div className="d-flex align-items-center gap-2">
+                          <span className="badge-riesgo badge-riesgo-critico">
+                            <i className="bi bi-exclamation-triangle-fill me-1"></i>
+                            {criticos.length} insumo{criticos.length > 1 ? 's' : ''} crítico{criticos.length > 1 ? 's' : ''}
+                          </span>
+                          <small className="text-muted">
+                            {criticos.map(r => r.insumoNombre).join(', ')}
+                          </small>
+                        </div>
+                      )}
+                      {bajos.length > 0 && (
+                        <div className="d-flex align-items-center gap-2">
+                          <span className="badge-riesgo badge-riesgo-bajo">
+                            <i className="bi bi-exclamation-circle-fill me-1"></i>
+                            {bajos.length} insumo{bajos.length > 1 ? 's' : ''} con cobertura baja
+                          </span>
+                          <small className="text-muted">
+                            {bajos.map(r => r.insumoNombre).join(', ')}
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
 
           <div className="row g-3">
             <div className="col-lg-6">

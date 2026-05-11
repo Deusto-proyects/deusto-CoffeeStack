@@ -64,6 +64,7 @@ export default function Layout() {
               {navItem('/ajustes', 'bi-clipboard-data', 'Ajustes')}
               {hasRole('PROPIETARIO', 'ROOT') && navItem('/historial', 'bi-journal-text', 'Historial')}
               {hasRole('PROPIETARIO', 'ROOT') && navItem('/estimacion-consumo', 'bi-graph-up-arrow', 'Estimación')}
+              {hasRole('PROPIETARIO', 'ROOT') && navItem('/cobertura-insumos', 'bi-shield-exclamation', 'Cobertura')}
               {navItem('/ventas', 'bi-receipt', 'Ventas')}
               {hasRole('ROOT') && navItem('/usuarios', 'bi-people-fill', 'Usuarios')}
             </ul>
