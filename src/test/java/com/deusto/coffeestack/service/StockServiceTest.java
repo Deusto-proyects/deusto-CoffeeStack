@@ -2,6 +2,8 @@ package com.deusto.coffeestack.service;
 
 import com.deusto.coffeestack.domain.Insumo;
 import com.deusto.coffeestack.domain.Lote;
+import com.deusto.coffeestack.dto.CoberturaInsumoResponse;
+import com.deusto.coffeestack.dto.EstimacionConsumoResponse;
 import com.deusto.coffeestack.dto.StockInsumoResponse;
 import com.deusto.coffeestack.exception.NotFoundException;
 import com.deusto.coffeestack.repository.InsumoRepository;
@@ -126,5 +128,89 @@ class StockServiceTest {
         assertEquals("Café", all.get(0).getInsumo().getNombre());
         assertFalse(all.get(0).isTieneRiesgoFaltante());
         assertTrue(all.get(1).isTieneRiesgoFaltante());
+    }
+    // ---- tests: getCoberturaTodosInsumos ----
+
+    /**
+     * Helper: crea un EstimacionConsumoResponse con el consumo medio indicado.
+     */
+    private EstimacionConsumoResponse buildEstimacion(Insumo insumo, double consumoMedioDiario) {
+        return new EstimacionConsumoResponse(
+                insumo.getId(),
+                insumo.getNombre(),
+                insumo.getUnidadMedida(),
+                30,                        // ventanaDias
+                consumoMedioDiario * 30,   // consumoTotal
+                consumoMedioDiario,
+                15,                        // diasConActividad (irrelevante aqui)
+                0,                         // horizonteDias
+                0.0);                      // consumoProyectado
+    }
+
+    @Test
+    void getCobertura_nivelOK_cuandoDiasCoberturaMayorOIgual7() {
+        // 21 kg stock / 2 kg/dia = 10.5 dias -> OK
+        Insumo cafe = buildInsumo(1L, "Cafe", 5.0);
+        when(insumoRepository.findAll()).thenReturn(List.of(cafe));
+        when(loteRepository.findByInsumoId(1L))
+                .thenReturn(List.of(buildLote(10L, cafe, "LC-001", 21.0)));
+        when(estimacionConsumoService.calcular(1L, 30, 0))
+                .thenReturn(buildEstimacion(cafe, 2.0));
+
+        List<CoberturaInsumoResponse> result = stockService.getCoberturaTodosInsumos(30);
+
+        assertEquals(1, result.size());
+        assertEquals("Cafe", result.get(0).getInsumoNombre());
+        assertEquals("OK", result.get(0).getNivelRiesgo());
+        assertEquals(10.5, result.get(0).getDiasCobertura(), 0.001);
+    }
+
+    @Test
+    void getCobertura_nivelBAJO_cuandoDiasEntre3y6() {
+        // 10 kg stock / 2 kg/dia = 5 dias -> BAJO
+        Insumo leche = buildInsumo(2L, "Leche", 5.0);
+        when(insumoRepository.findAll()).thenReturn(List.of(leche));
+        when(loteRepository.findByInsumoId(2L))
+                .thenReturn(List.of(buildLote(20L, leche, "LL-001", 10.0)));
+        when(estimacionConsumoService.calcular(2L, 30, 0))
+                .thenReturn(buildEstimacion(leche, 2.0));
+
+        List<CoberturaInsumoResponse> result = stockService.getCoberturaTodosInsumos(30);
+
+        assertEquals("BAJO", result.get(0).getNivelRiesgo());
+        assertEquals(5.0, result.get(0).getDiasCobertura(), 0.001);
+    }
+
+    @Test
+    void getCobertura_nivelCRITICO_cuandoDiasMenorQue3() {
+        // 4 kg stock / 5 kg/dia = 0.8 dias -> CRITICO
+        Insumo azucar = buildInsumo(3L, "Azucar", 2.0);
+        when(insumoRepository.findAll()).thenReturn(List.of(azucar));
+        when(loteRepository.findByInsumoId(3L))
+                .thenReturn(List.of(buildLote(30L, azucar, "LA-001", 4.0)));
+        when(estimacionConsumoService.calcular(3L, 30, 0))
+                .thenReturn(buildEstimacion(azucar, 5.0));
+
+        List<CoberturaInsumoResponse> result = stockService.getCoberturaTodosInsumos(30);
+
+        assertEquals("CRITICO", result.get(0).getNivelRiesgo());
+        assertEquals(0.8, result.get(0).getDiasCobertura(), 0.001);
+    }
+
+    @Test
+    void getCobertura_sinConsumo_diasEsInfinito_nivelOK() {
+        // Sin historial de ventas: consumoMedioDiario = 0 -> Infinity -> OK
+        Insumo sal = buildInsumo(4L, "Sal", 1.0);
+        when(insumoRepository.findAll()).thenReturn(List.of(sal));
+        when(loteRepository.findByInsumoId(4L))
+                .thenReturn(List.of(buildLote(40L, sal, "LS-001", 5.0)));
+        when(estimacionConsumoService.calcular(4L, 30, 0))
+                .thenReturn(buildEstimacion(sal, 0.0));
+
+        List<CoberturaInsumoResponse> result = stockService.getCoberturaTodosInsumos(30);
+
+        assertTrue(Double.isInfinite(result.get(0).getDiasCobertura()),
+                "Sin consumo, los dias de cobertura deben ser Infinity");
+        assertEquals("OK", result.get(0).getNivelRiesgo());
     }
 }
