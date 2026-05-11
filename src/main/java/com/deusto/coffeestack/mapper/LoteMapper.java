@@ -17,7 +17,8 @@ public final class LoteMapper {
                 lote.getCantidadInicial(),
                 lote.getCantidadActual(),
                 lote.getFechaVencimiento(),
-                proveedorNombre
+                proveedorNombre,
+                lote.getPrecioCompra()
         );
     }
 }

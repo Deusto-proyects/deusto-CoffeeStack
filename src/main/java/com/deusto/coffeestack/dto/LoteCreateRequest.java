@@ -3,7 +3,9 @@ package com.deusto.coffeestack.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -28,6 +30,10 @@ public class LoteCreateRequest {
     /** Optional: null means the supply does not expire. */
     private LocalDate fechaVencimiento;
 
+    /** Optional: unit purchase cost. Used to estimate consumption cost in reports. */
+    @PositiveOrZero(message = "El precio de compra no puede ser negativo")
+    private BigDecimal precioCompra;
+
     // ---- getters & setters ----
 
     public Long getInsumoId() { return insumoId; }
@@ -44,4 +50,7 @@ public class LoteCreateRequest {
 
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
+
+    public BigDecimal getPrecioCompra() { return precioCompra; }
+    public void setPrecioCompra(BigDecimal precioCompra) { this.precioCompra = precioCompra; }
 }

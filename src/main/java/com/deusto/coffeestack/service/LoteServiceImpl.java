@@ -58,6 +58,7 @@ public class LoteServiceImpl implements LoteService {
         lote.setCantidadInicial(request.getCantidad());
         lote.setCantidadActual(request.getCantidad());
         lote.setFechaVencimiento(request.getFechaVencimiento());
+        lote.setPrecioCompra(request.getPrecioCompra());
 
         return LoteMapper.toResponse(loteRepository.save(lote));
     }

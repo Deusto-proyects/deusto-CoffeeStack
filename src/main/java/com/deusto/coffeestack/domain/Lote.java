@@ -1,6 +1,7 @@
 package com.deusto.coffeestack.domain;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -42,6 +43,13 @@ public class Lote {
     @Column(name = "fecha_vencimiento")
     private LocalDate fechaVencimiento;
 
+    /**
+     * Coste unitario al que se compró este lote.
+     * Nullable: lotes anteriores al Sprint 3 final pueden no tener este dato.
+     */
+    @Column(name = "precio_compra", precision = 12, scale = 2)
+    private BigDecimal precioCompra;
+
     // ---- getters & setters ----
 
     public Long getId() { return id; }
@@ -64,6 +72,9 @@ public class Lote {
 
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
+
+    public BigDecimal getPrecioCompra() { return precioCompra; }
+    public void setPrecioCompra(BigDecimal precioCompra) { this.precioCompra = precioCompra; }
 
     /** Convenience: returns true when this batch still has stock available. */
     public boolean tieneStock() {
