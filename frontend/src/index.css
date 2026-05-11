@@ -103,3 +103,32 @@ body {
   padding: 2rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
+
+/* ---- Semáforo de cobertura de insumos ---- */
+.badge-riesgo {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3em 0.7em;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-riesgo-critico {
+  background-color: #fde8e8;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.badge-riesgo-bajo {
+  background-color: #fff8e1;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+
+.badge-riesgo-ok {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
