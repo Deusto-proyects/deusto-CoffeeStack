@@ -1,5 +1,6 @@
 package com.deusto.coffeestack.service;
 
+import com.deusto.coffeestack.dto.CoberturaInsumoResponse;
 import com.deusto.coffeestack.dto.StockInsumoResponse;
 
 import java.util.List;
@@ -28,4 +29,16 @@ public interface StockService {
      * Returns the stock summary for every registered insumo.
      */
     List<StockInsumoResponse> getStockTodosInsumos();
+
+    /**
+     * Returns the estimated coverage days for every registered insumo.
+     *
+     * <p>Coverage days = total stock / average daily consumption computed
+     * over the given {@code ventanaDias} window.
+     * If consumption is zero the result is {@link Double#POSITIVE_INFINITY}
+     * and the risk level is set to {@code OK}.
+     *
+     * @param ventanaDias sampling window in days (must be &gt;= 1)
+     */
+    List<CoberturaInsumoResponse> getCoberturaTodosInsumos(int ventanaDias);
 }

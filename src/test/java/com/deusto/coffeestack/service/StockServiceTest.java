@@ -27,6 +27,9 @@ class StockServiceTest {
     @Mock
     LoteRepository loteRepository;
 
+    @Mock
+    EstimacionConsumoService estimacionConsumoService;
+
     @InjectMocks
     StockServiceImpl stockService;
 
