@@ -3,6 +3,7 @@ package com.deusto.coffeestack.controller;
 import com.deusto.coffeestack.dto.CambiarRolRequest;
 import com.deusto.coffeestack.dto.UsuarioCreateRequest;
 import com.deusto.coffeestack.dto.UsuarioResponse;
+import com.deusto.coffeestack.dto.UsuarioUpdateRequest;
 import com.deusto.coffeestack.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -21,10 +22,12 @@ import java.util.List;
  * <p>All endpoints require the ROOT role.
  *
  * <ul>
- *   <li>{@code POST   /api/usuarios}           – create user</li>
- *   <li>{@code GET    /api/usuarios}           – list users</li>
- *   <li>{@code PATCH  /api/usuarios/{id}/rol}  – change role</li>
- *   <li>{@code DELETE /api/usuarios/{id}}      – deactivate user</li>
+ *   <li>{@code POST   /api/usuarios}              – create user</li>
+ *   <li>{@code GET    /api/usuarios}              – list users</li>
+ *   <li>{@code PUT    /api/usuarios/{id}}         – edit username/password</li>
+ *   <li>{@code PATCH  /api/usuarios/{id}/rol}     – change role</li>
+ *   <li>{@code PATCH  /api/usuarios/{id}/activar} – reactivate user</li>
+ *   <li>{@code DELETE /api/usuarios/{id}}         – deactivate user</li>
  * </ul>
  */
 @RestController
@@ -55,11 +58,24 @@ public class UsuarioController {
         return service.listar();
     }
 
+    @PutMapping("/{id}")
+    @Operation(summary = "Editar username y/o password de un usuario")
+    public UsuarioResponse editar(@PathVariable Long id,
+                                  @Valid @RequestBody UsuarioUpdateRequest request) {
+        return service.editar(id, request);
+    }
+
     @PatchMapping("/{id}/rol")
     @Operation(summary = "Cambiar el rol de un usuario")
     public UsuarioResponse cambiarRol(@PathVariable Long id,
                                       @Valid @RequestBody CambiarRolRequest request) {
         return service.cambiarRol(id, request.getRol());
+    }
+
+    @PatchMapping("/{id}/activar")
+    @Operation(summary = "Reactivar un usuario previamente desactivado")
+    public UsuarioResponse activar(@PathVariable Long id) {
+        return service.activar(id);
     }
 
     @DeleteMapping("/{id}")

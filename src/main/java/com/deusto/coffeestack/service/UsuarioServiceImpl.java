@@ -4,6 +4,7 @@ import com.deusto.coffeestack.domain.RolEnum;
 import com.deusto.coffeestack.domain.Usuario;
 import com.deusto.coffeestack.dto.UsuarioCreateRequest;
 import com.deusto.coffeestack.dto.UsuarioResponse;
+import com.deusto.coffeestack.dto.UsuarioUpdateRequest;
 import com.deusto.coffeestack.exception.NotFoundException;
 import com.deusto.coffeestack.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,5 +57,34 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + id));
         usuario.setActivo(false);
         repository.save(usuario);
+    }
+
+    @Override
+    public UsuarioResponse activar(Long id) {
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + id));
+        usuario.setActivo(true);
+        return UsuarioResponse.from(repository.save(usuario));
+    }
+
+    @Override
+    public UsuarioResponse editar(Long id, UsuarioUpdateRequest request) {
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + id));
+
+        String nuevoUsername = request.getUsername().trim();
+        if (!nuevoUsername.equals(usuario.getUsername())) {
+            repository.findByUsername(nuevoUsername).ifPresent(existing -> {
+                throw new IllegalArgumentException("Ya existe un usuario con username: " + nuevoUsername);
+            });
+            usuario.setUsername(nuevoUsername);
+        }
+
+        String pwd = request.getPassword();
+        if (pwd != null && !pwd.isBlank()) {
+            usuario.setPasswordHash(passwordEncoder.encode(pwd));
+        }
+
+        return UsuarioResponse.from(repository.save(usuario));
     }
 }

@@ -3,6 +3,7 @@ package com.deusto.coffeestack.service;
 import com.deusto.coffeestack.domain.RolEnum;
 import com.deusto.coffeestack.dto.UsuarioCreateRequest;
 import com.deusto.coffeestack.dto.UsuarioResponse;
+import com.deusto.coffeestack.dto.UsuarioUpdateRequest;
 
 import java.util.List;
 
@@ -15,4 +16,8 @@ public interface UsuarioService {
     UsuarioResponse cambiarRol(Long id, RolEnum nuevoRol);
 
     void desactivar(Long id);
+
+    UsuarioResponse activar(Long id);
+
+    UsuarioResponse editar(Long id, UsuarioUpdateRequest request);
 }

@@ -3,6 +3,7 @@ package com.deusto.coffeestack.controller;
 import com.deusto.coffeestack.domain.RolEnum;
 import com.deusto.coffeestack.dto.CambiarRolRequest;
 import com.deusto.coffeestack.dto.UsuarioCreateRequest;
+import com.deusto.coffeestack.dto.UsuarioUpdateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +131,69 @@ class UsuarioControllerIT {
     @WithMockUser(roles = "PROPIETARIO")
     void listarUsuarios_comoPropietario_devuelve403() throws Exception {
         mockMvc.perform(get("/api/usuarios"))
+                .andExpect(status().isForbidden());
+    }
+
+    // ── activar (PATCH) ─────────────────────────────────────────────────────
+
+    @Test
+    @WithMockUser(roles = "ROOT")
+    void activarUsuario_comoRoot_devuelve200YActivoTrue() throws Exception {
+        // crear → desactivar → activar
+        String location = mockMvc.perform(post("/api/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(empleadoRequest("_activate"))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getHeader("Location");
+        assert location != null;
+        String id = location.substring(location.lastIndexOf('/') + 1);
+
+        mockMvc.perform(delete("/api/usuarios/" + id)).andExpect(status().isNoContent());
+
+        mockMvc.perform(patch("/api/usuarios/" + id + "/activar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.activo").value(true));
+    }
+
+    @Test
+    @WithMockUser(roles = "EMPLEADO")
+    void activarUsuario_comoEmpleado_devuelve403() throws Exception {
+        mockMvc.perform(patch("/api/usuarios/1/activar"))
+                .andExpect(status().isForbidden());
+    }
+
+    // ── editar (PUT) ────────────────────────────────────────────────────────
+
+    @Test
+    @WithMockUser(roles = "ROOT")
+    void editarUsuario_comoRoot_cambiaUsername() throws Exception {
+        String location = mockMvc.perform(post("/api/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(empleadoRequest("_edit"))))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getHeader("Location");
+        assert location != null;
+        String id = location.substring(location.lastIndexOf('/') + 1);
+
+        UsuarioUpdateRequest update = new UsuarioUpdateRequest();
+        update.setUsername("empleado_edit_renamed");
+
+        mockMvc.perform(put("/api/usuarios/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("empleado_edit_renamed"));
+    }
+
+    @Test
+    @WithMockUser(roles = "EMPLEADO")
+    void editarUsuario_comoEmpleado_devuelve403() throws Exception {
+        UsuarioUpdateRequest update = new UsuarioUpdateRequest();
+        update.setUsername("hacker");
+
+        mockMvc.perform(put("/api/usuarios/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
                 .andExpect(status().isForbidden());
     }
 }
