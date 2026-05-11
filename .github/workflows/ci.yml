@@ -26,7 +26,8 @@ jobs:
       run: chmod +x gradlew
       
     - name: Build and run all tests with Gradle
-      # El comando 'build' ejecutará tanto 'test' como 'integrationTest' gracias a nuestra configuración
+      # 'build' incluye 'check' = test + integrationTest + jacocoTestReport.
+      # FlywayVendorParityTest valida que las migraciones MySQL y PostgreSQL no divergen.
       run: ./gradlew build
 
   build-frontend:

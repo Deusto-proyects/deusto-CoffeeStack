@@ -249,7 +249,29 @@ src/main/resources/
 |--------|--------|----------|--------|
 | 1 | 9–25 marzo | Inventario base, roles, login | Completado |
 | 2 | 13–28 abril | Ventas, descuento automático FIFO, alertas, CI | Completado |
-| 3 | 4–18 mayo | Reposición, forecast SES, reportes CSV | Pendiente |
+| 3 | 4–18 mayo | Gestión usuarios, reporte consumo, PostgreSQL, Pages | Completado |
+
+## Sprint 3 — Entregables (4–18 mayo)
+
+### Historias de usuario completadas
+
+- **HU-Usuarios** — *Como administrador quiero poder gestionar usuarios (alta/baja/activar/desactivar) para administrar el acceso al sistema.*
+  - Endpoints nuevos: `PATCH /api/usuarios/{id}/activar`, `PUT /api/usuarios/{id}` (editar username/password).
+  - Auditoría JPA: `Usuario` registra `createdAt/by` y `updatedAt/by` automáticamente vía `AuditorAware` (lee el SecurityContext).
+  - Vista `/admin/usuarios` con filtros (activos/inactivos/todos), botones contextuales y formulario reutilizable en modo "nuevo" y "editar".
+- **HU-Reporte consumo** — *Como propietario quiero poder ver un reporte de consumo por insumo en un rango de fechas para entender patrones y costes operativos.*
+  - Endpoint `GET /api/reportes/consumo` con `insumoId`, `desde`, `hasta`, `granularidad=DIA|SEMANA`.
+  - Coste estimado calculado como `cantidad × Lote.precioCompra` (nuevo campo añadido en V10).
+  - Desglose por `TipoMovimiento` (VENTA/MERMA/ROTURA/AJUSTE_NEGATIVO) + serie temporal agrupada por día o por lunes ISO.
+  - Vista `/reportes/consumo` con tarjetas de resumen, tabla de desglose y gráfico dual-axis con **recharts**.
+
+### Infraestructura y procesos
+
+- **PostgreSQL en local** vía `docker-compose.yml` (perfil `local` por defecto). MySQL se mantiene en `dev`/`prod`.
+- **Flyway dual-vendor**: `db/migration/mysql/V1-V10` y `db/migration/postgresql/V1-V10` se traducen entre dialectos. Test `FlywayVendorParityTest` falla si las carpetas divergen.
+- **Datos de demo** en `db/seed/{mysql,postgresql}/V11__demo_data.sql` (perfiles `local` y `dev`) para que el reporte de consumo tenga datos visibles desde el arranque.
+- **Documentación automática**: workflow `.github/workflows/docs.yml` publica el Javadoc en GitHub Pages tras cada push a `main`. Swagger UI sigue disponible en la app arrancada.
+- **Tests añadidos**: `SpringSecurityAuditorAwareTest`, `UsuarioServiceImplTest`, `ReporteConsumoServiceImplTest` (unitarios) y nuevos casos en `UsuarioControllerIT` + `ReporteControllerIT` (integración).
 
 ## Sprint 2 — Entregables (13–28 abril)
 
