@@ -1,0 +1,91 @@
+name: Publish docs to GitHub Pages
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Javadoc
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Generate Javadoc
+        run: ./gradlew javadoc
+
+      - name: Assemble site
+        run: |
+          mkdir -p site/javadoc
+          cp -r build/docs/javadoc/* site/javadoc/
+          cat > site/index.html <<'HTML'
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="utf-8">
+            <title>CoffeeStack — Documentación</title>
+            <style>
+              body { font-family: -apple-system, system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; color: #222; }
+              h1 { color: #6f4e37; }
+              a { color: #6f4e37; }
+              .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px 20px; margin: 16px 0; }
+              code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+            </style>
+          </head>
+          <body>
+            <h1>CoffeeStack — Documentación</h1>
+            <p>Proyecto de Proceso de Software y Calidad — Universidad de Deusto (2025-26).</p>
+            <div class="card">
+              <h2>Javadoc del backend</h2>
+              <p><a href="./javadoc/">Abrir Javadoc</a> — clases, servicios y controladores del backend Spring Boot.</p>
+            </div>
+            <div class="card">
+              <h2>API REST (Swagger UI)</h2>
+              <p>La especificación OpenAPI se sirve desde la propia aplicación al arrancar:</p>
+              <p><code>http://localhost:8080/swagger-ui/index.html</code></p>
+            </div>
+            <div class="card">
+              <h2>Repositorio</h2>
+              <p><a href="https://github.com/Deusto-proyects/deusto-CoffeeStack">deusto-CoffeeStack en GitHub</a></p>
+            </div>
+          </body>
+          </html>
+          HTML
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

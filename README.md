@@ -9,61 +9,112 @@ Permite controlar insumos, lotes, stock, mermas y roturas mediante una API REST 
 - **Java 21** + **Spring Boot 3.2.5**
 - **Spring Security** + JWT (JJWT 0.12.3)
 - **Spring Data JPA** + Hibernate + **Flyway** (migraciones)
-- **MySQL** (producción/dev) · **H2** (local/tests)
+- **PostgreSQL 16** (perfil `local`, vía Docker) · **MySQL 8** (`dev`/`prod`) · **H2** (tests)
 - **SpringDoc OpenAPI** (Swagger UI en `/swagger-ui/index.html`)
+- Frontend: **React 19 + Vite + Bootstrap 5 + recharts**
 
-## Compilación y ejecución
+## Quickstart con datos demo
 
-### Requisitos previos
+Arranque mínimo para ver todas las funcionalidades con datos ya poblados.
+
+### Requisitos
 
 - Java 21+
-- No es necesario instalar Gradle; el proyecto incluye el wrapper `./gradlew`
+- Node 20+
+- Docker + docker compose (para PostgreSQL en local)
 
-### Compilar
-
-```bash
-./gradlew build
-```
-
-### Ejecutar en local (H2 en memoria, sin base de datos externa)
+### Pasos
 
 ```bash
+# 1. Levantar PostgreSQL en local
+docker compose up -d
+
+# 2. Arrancar el backend (perfil 'local' por defecto, aplica V1-V11 incluyendo demo data)
 ./gradlew bootRun
+
+# 3. En otra terminal, arrancar el frontend
+cd frontend
+npm install
+npm run dev
 ```
 
-La aplicación arranca en `http://localhost:8080`.
-Consola H2 disponible en `http://localhost:8080/h2-console`.
+### Credenciales y URLs
 
-### Ejecutar con perfil dev (MySQL local)
+| Servicio | URL |
+|----------|-----|
+| Frontend | http://localhost:5173 |
+| Backend  | http://localhost:8080 |
+| Swagger  | http://localhost:8080/swagger-ui/index.html |
+| Javadoc  | https://deusto-proyects.github.io/deusto-CoffeeStack/javadoc/ |
+
+| Usuario demo | Password | Rol |
+|--------------|----------|-----|
+| `admin` | `admin123` | ROOT |
+
+El usuario `admin` lo crea automáticamente `DataInitializer` al arrancar.
+Crea más usuarios desde `/admin/usuarios` (solo ROOT) o vía `POST /api/usuarios`.
+
+### Qué hay en la BD tras la primera ejecución
+
+La migración `V11__demo_data.sql` (solo en perfiles `local` y `dev`) precarga:
+- 2 proveedores, 4 insumos (Café, Leche, Azúcar, Vasos)
+- 4 lotes con `precio_compra` para el cálculo de coste en reportes
+- 9 movimientos VENTA/MERMA/ROTURA repartidos en los últimos 25 días
+
+Eso permite ver el **Reporte de consumo** (`/reportes/consumo`) con datos no triviales
+en el rango por defecto (últimos 30 días).
+
+## Compilación y ejecución (avanzado)
+
+### Perfiles disponibles
+
+| Perfil | Base de datos | Datos demo |
+|--------|---------------|------------|
+| `local` (default) | PostgreSQL via docker-compose | Sí |
+| `dev`             | MySQL local                   | Sí |
+| `prod`            | MySQL (vars de entorno)       | No |
+| `test`            | H2 en memoria (MODE=MySQL)    | No |
+
+### Perfil `dev` (MySQL local)
 
 ```bash
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
-Variables de entorno necesarias (o usa los valores por defecto):
+Variables de entorno (con defaults):
 
 | Variable | Default |
 |----------|---------|
 | `DB_USER` | `root` |
 | `DB_PASS` | `password` |
 
-La base de datos debe existir: `coffeestack` en `localhost:3306`.
+La base `coffeestack` debe existir en `localhost:3306`.
 
-### Ejecutar en producción
+### Producción
 
 ```bash
 java -jar build/libs/coffeestack-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
-Variables de entorno requeridas: `DB_URL`, `DB_USER`, `DB_PASS`.
+Variables de entorno **obligatorias**: `DB_URL`, `DB_USER`, `DB_PASS`.
 
-### Ejecutar los tests
+### Tests
 
 ```bash
-./gradlew test
+./gradlew test            # unitarios (*Test)
+./gradlew integrationTest # de integración (*IT)
+./gradlew check           # ambos + JaCoCo
 ```
 
-Los tests usan H2 en memoria automáticamente (perfil `test`).
+### Generar la documentación localmente
+
+```bash
+./gradlew javadoc
+# salida en build/docs/javadoc/index.html
+```
+
+El workflow `.github/workflows/docs.yml` la publica automáticamente en GitHub Pages
+tras cada push a `main`.
 
 ## Roles del sistema
 
@@ -133,8 +184,17 @@ Todas las rutas protegidas requieren cabecera `Authorization: Bearer <token>`.
 | Método | Ruta | Acceso | Descripción |
 |--------|------|--------|-------------|
 | `POST` | `/api/usuarios` | ROOT | Crear usuario |
-| `GET` | `/api/usuarios` | ROOT | Listar usuarios |
+| `GET` | `/api/usuarios` | ROOT | Listar usuarios (con auditoría createdAt/by, updatedAt/by) |
+| `PUT` | `/api/usuarios/{id}` | ROOT | Editar username y/o password (password opcional) |
+| `PATCH` | `/api/usuarios/{id}/rol` | ROOT | Cambiar el rol |
+| `PATCH` | `/api/usuarios/{id}/activar` | ROOT | Reactivar un usuario desactivado |
 | `DELETE` | `/api/usuarios/{id}` | ROOT | Desactivar usuario |
+
+### Reportes — `/api/reportes`
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `GET` | `/api/reportes/consumo` | PROPIETARIO/ROOT | Reporte de consumo de un insumo en un rango de fechas. Parámetros: `insumoId`, `desde` (YYYY-MM-DD), `hasta` (YYYY-MM-DD), `granularidad` (DIA\|SEMANA, default DIA). Devuelve cantidad y coste estimado totales, desglose por tipo de movimiento y serie temporal para gráfico. |
 
 ### Items — `/api/items`
 
@@ -175,7 +235,12 @@ src/main/java/com/deusto/coffeestack/
 └── config/          Seguridad, OpenAPI, inicialización de datos
 src/main/resources/
 ├── application.yml               Configuración multi-perfil (local/dev/prod)
-└── db/migration/                 Scripts Flyway (V1–V6)
+├── db/migration/
+│   ├── mysql/                    V1-V10 schema (MySQL/H2)
+│   └── postgresql/               V1-V10 schema (PostgreSQL)
+└── db/seed/
+    ├── mysql/V11__demo_data.sql       Demo data (perfiles local/dev)
+    └── postgresql/V11__demo_data.sql  Demo data (perfiles local/dev)
 ```
 
 ## Planificación de sprints

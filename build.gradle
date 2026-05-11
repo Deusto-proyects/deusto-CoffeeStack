@@ -87,6 +87,17 @@ tasks.register('performanceTest', Test) {
 // 'check' encadena unitarios + integración. Rendimiento queda fuera (es pesado, se lanza a mano).
 check.dependsOn integrationTest
 
+// Javadoc con configuración tolerante (sin fallar por warnings de doclint), UTF-8 y
+// salida en build/docs/javadoc — la usa el workflow de GitHub Pages.
+javadoc {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.docTitle = 'CoffeeStack API'
+    options.windowTitle = 'CoffeeStack API'
+    options.addStringOption('Xdoclint:none', '-quiet')
+    failOnError = false
+}
+
 // JaCoCo: cobertura tras los tests unitarios
 jacocoTestReport {
     dependsOn test
