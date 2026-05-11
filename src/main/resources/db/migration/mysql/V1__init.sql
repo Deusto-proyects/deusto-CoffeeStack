@@ -1,4 +1,4 @@
-﻿CREATE TABLE items (
+CREATE TABLE items (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(120) NOT NULL,
     description VARCHAR(500),

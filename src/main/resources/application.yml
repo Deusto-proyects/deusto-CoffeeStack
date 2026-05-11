@@ -25,7 +25,7 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: classpath:db/migration/mysql
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -46,26 +46,27 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: classpath:db/migration/mysql
 ---
 spring:
   config:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:h2:mem:coffeestack;MODE=MySQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/coffeestack
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER:coffee}
+    password: ${DB_PASS:coffee}
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
-    locations: classpath:db/migration
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
+    locations: classpath:db/migration/postgresql
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
