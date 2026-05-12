@@ -2,11 +2,14 @@ package com.deusto.coffeestack.controller;
 
 import com.deusto.coffeestack.dto.VentaRequest;
 import com.deusto.coffeestack.dto.VentaResponse;
+import com.deusto.coffeestack.service.CsvExportService;
 import com.deusto.coffeestack.service.VentaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -33,9 +37,11 @@ import java.util.List;
 public class VentaController {
 
     private final VentaService ventaService;
+    private final CsvExportService csvExportService;
 
-    public VentaController(VentaService ventaService) {
+    public VentaController(VentaService ventaService, CsvExportService csvExportService) {
         this.ventaService = ventaService;
+        this.csvExportService = csvExportService;
     }
 
     /**
@@ -63,6 +69,23 @@ public class VentaController {
     @Operation(summary = "Obtener reporte de ventas por día y producto")
     public List<com.deusto.coffeestack.dto.ReporteVentasDTO> obtenerReporte() {
         return ventaService.obtenerReporteVentas();
+    }
+
+    /**
+     * Descarga el reporte de ventas como fichero CSV.
+     * El fichero incluye BOM UTF-8 para compatibilidad con Microsoft Excel.
+     */
+    @GetMapping("/reporte/csv")
+    @PreAuthorize("hasAnyRole('PROPIETARIO', 'ROOT')")
+    @Operation(summary = "Descargar reporte de ventas en formato CSV")
+    public ResponseEntity<byte[]> descargarReporteCsv() {
+        String csv = csvExportService.ventasToCsv(ventaService.obtenerReporteVentas());
+        byte[] bytes = csv.getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reporte_ventas.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .contentLength(bytes.length)
+                .body(bytes);
     }
 
     /** Devuelve todas las ventas registradas, de más reciente a más antigua. */
