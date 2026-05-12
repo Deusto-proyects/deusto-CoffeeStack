@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: h2
 
 server:
   port: 8080
@@ -70,3 +70,21 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: h2
+  datasource:
+    url: jdbc:h2:mem:coffeestack;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  flyway:
+    enabled: false
+

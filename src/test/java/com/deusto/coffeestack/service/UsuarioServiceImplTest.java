@@ -10,12 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.deusto.coffeestack.dto.UsuarioCreateRequest;
 
 class UsuarioServiceImplTest {
 
@@ -38,6 +40,80 @@ class UsuarioServiceImplTest {
         u.setRol(RolEnum.EMPLEADO);
         u.setActivo(false);
         return u;
+    }
+
+    // ── crear ────────────────────────────────────────────────────────────────
+
+    @Test
+    void crear_creaUsuarioConHashYActivo() {
+        UsuarioCreateRequest req = new UsuarioCreateRequest();
+        req.setUsername("nuevo");
+        req.setPassword("pass");
+        req.setRol(RolEnum.EMPLEADO);
+
+        when(passwordEncoder.encode("pass")).thenReturn("hash-nuevo");
+        when(repository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UsuarioResponse result = service.crear(req);
+
+        assertThat(result.getUsername()).isEqualTo("nuevo");
+        assertThat(result.getRol()).isEqualTo(RolEnum.EMPLEADO);
+        assertThat(result.isActivo()).isTrue();
+    }
+
+    // ── listar ──────────────────────────────────────────────────────────────
+
+    @Test
+    void listar_devuelveListaDeUsuarios() {
+        Usuario u = sampleUsuario();
+        when(repository.findAll()).thenReturn(List.of(u));
+
+        List<UsuarioResponse> list = service.listar();
+
+        assertThat(list).hasSize(1);
+        assertThat(list.get(0).getUsername()).isEqualTo(u.getUsername());
+    }
+
+    // ── cambiarRol ──────────────────────────────────────────────────────────
+
+    @Test
+    void cambiarRol_cambiaRolExitosamente() {
+        Usuario u = sampleUsuario();
+        when(repository.findById(1L)).thenReturn(Optional.of(u));
+        when(repository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UsuarioResponse result = service.cambiarRol(1L, RolEnum.PROPIETARIO);
+
+        assertThat(result.getRol()).isEqualTo(RolEnum.PROPIETARIO);
+        assertThat(u.getRol()).isEqualTo(RolEnum.PROPIETARIO);
+    }
+
+    @Test
+    void cambiarRol_lanzaNotFound() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.cambiarRol(99L, RolEnum.PROPIETARIO))
+            .isInstanceOf(NotFoundException.class);
+    }
+
+    // ── desactivar ──────────────────────────────────────────────────────────
+
+    @Test
+    void desactivar_desactivaUsuarioExitosamente() {
+        Usuario u = sampleUsuario();
+        u.setActivo(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(u));
+        when(repository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.desactivar(1L);
+
+        assertThat(u.isActivo()).isFalse();
+    }
+
+    @Test
+    void desactivar_lanzaNotFound() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.desactivar(99L))
+            .isInstanceOf(NotFoundException.class);
     }
 
     // ── activar ──────────────────────────────────────────────────────────────
