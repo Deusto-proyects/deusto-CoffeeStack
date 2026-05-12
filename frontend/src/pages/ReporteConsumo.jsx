@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import client, { apiErrorMessage } from '../api/client'
 import PageHeader from '../components/PageHeader'
+import { downloadCsv } from '../utils/csvDownload'
 import {
   CartesianGrid,
   Legend,
@@ -38,6 +39,8 @@ export default function ReporteConsumo() {
   const [reporte, setReporte] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [csvLoading, setCsvLoading] = useState(false)
+  const [csvError, setCsvError] = useState(null)
 
   useEffect(() => {
     async function loadInsumos() {
@@ -75,6 +78,24 @@ export default function ReporteConsumo() {
       setError(apiErrorMessage(err))
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleExportCsv() {
+    if (!insumoId) return
+    try {
+      setCsvLoading(true)
+      setCsvError(null)
+      const insumoNombre = insumos.find(i => String(i.id) === String(insumoId))?.nombre || 'insumo'
+      await downloadCsv(
+        '/api/reportes/consumo/csv',
+        `consumo_${insumoNombre.replace(/\s+/g, '_')}.csv`,
+        { insumoId, desde, hasta, granularidad }
+      )
+    } catch (e) {
+      setCsvError(e.message)
+    } finally {
+      setCsvLoading(false)
     }
   }
 
@@ -157,9 +178,32 @@ export default function ReporteConsumo() {
                 )}
               </button>
             </div>
+            <div className="col-md-2">
+              <button
+                id="btn-exportar-csv-consumo"
+                className="btn btn-outline-secondary w-100"
+                onClick={handleExportCsv}
+                disabled={csvLoading || !reporte}
+                title={!reporte ? 'Genera el reporte primero' : 'Descargar como CSV'}
+              >
+                {csvLoading ? (
+                  <><span className="spinner-border spinner-border-sm me-1" />Exportando…</>
+                ) : (
+                  <><i className="bi bi-file-earmark-spreadsheet me-1" />Exportar CSV</>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {csvError && (
+        <div className="alert alert-danger alert-dismissible" role="alert">
+          <i className="bi bi-exclamation-triangle me-2" />
+          {csvError}
+          <button type="button" className="btn-close" onClick={() => setCsvError(null)} />
+        </div>
+      )}
 
       {reporte && (
         <>
