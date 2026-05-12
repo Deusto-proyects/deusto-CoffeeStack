@@ -26,6 +26,7 @@ import VentaForm from './pages/VentaForm'
 import VentaDetalle from './pages/VentaDetalle'
 import CoberturaInsumos from './pages/CoberturaInsumos'
 import ReporteConsumo from './pages/ReporteConsumo'
+import Reportes from './pages/Reportes'
 
 export default function App() {
   return (
@@ -142,6 +143,15 @@ export default function App() {
           element={
             <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
               <CoberturaInsumos />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="reportes"
+          element={
+            <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
+              <Reportes />
             </ProtectedRoute>
           }
         />
