@@ -42,7 +42,7 @@ class InsumoControllerTest {
 
     @Test
     void listar_retornaPagina() throws Exception {
-        InsumoResponse res = new InsumoResponse(1L, "Cafe", "KG", 10.0, true);
+        InsumoResponse res = new InsumoResponse(1L, "Cafe", "KG", 10.0, true, 7, 14);
         Page<InsumoResponse> page = new PageImpl<>(List.of(res));
         when(service.listar(any(Pageable.class))).thenReturn(page);
 
@@ -53,7 +53,7 @@ class InsumoControllerTest {
 
     @Test
     void obtener_retornaInsumo() throws Exception {
-        InsumoResponse res = new InsumoResponse(1L, "Cafe", "KG", 10.0, true);
+        InsumoResponse res = new InsumoResponse(1L, "Cafe", "KG", 10.0, true, 7, 14);
         when(service.obtenerPorId(1L)).thenReturn(res);
 
         mockMvc.perform(get("/api/insumos/1"))
@@ -68,7 +68,7 @@ class InsumoControllerTest {
         req.setUnidadMedida("KG");
         req.setStockMinimoAlerta(5.0);
 
-        InsumoResponse res = new InsumoResponse(1L, "Cafe", "KG", 5.0, true);
+        InsumoResponse res = new InsumoResponse(1L, "Cafe", "KG", 5.0, true, 7, 14);
         when(service.crear(any())).thenReturn(res);
 
         mockMvc.perform(post("/api/insumos")
@@ -85,7 +85,7 @@ class InsumoControllerTest {
         req.setUnidadMedida("KG");
         req.setStockMinimoAlerta(5.0);
 
-        InsumoResponse res = new InsumoResponse(1L, "Cafe", "KG", 5.0, true);
+        InsumoResponse res = new InsumoResponse(1L, "Cafe", "KG", 5.0, true, 7, 14);
         when(service.actualizar(eq(1L), any())).thenReturn(res);
 
         mockMvc.perform(put("/api/insumos/1")

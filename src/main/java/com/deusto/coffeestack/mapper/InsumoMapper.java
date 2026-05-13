@@ -12,7 +12,9 @@ public final class InsumoMapper {
                 insumo.getNombre(),
                 insumo.getUnidadMedida(),
                 insumo.getStockMinimoAlerta(),
-                insumo.isActivo()
+                insumo.isActivo(),
+                insumo.getLeadTimeDias(),
+                insumo.getDiasCobertura()
         );
     }
 }

@@ -42,6 +42,8 @@ public class InsumoServiceImpl implements InsumoService {
         insumo.setNombre(request.getNombre());
         insumo.setUnidadMedida(request.getUnidadMedida());
         insumo.setStockMinimoAlerta(request.getStockMinimoAlerta());
+        insumo.setLeadTimeDias(request.getLeadTimeDias());
+        insumo.setDiasCobertura(request.getDiasCobertura());
         insumo.setActivo(true);
         return InsumoMapper.toResponse(repository.save(insumo));
     }
@@ -54,6 +56,8 @@ public class InsumoServiceImpl implements InsumoService {
         insumo.setNombre(request.getNombre());
         insumo.setUnidadMedida(request.getUnidadMedida());
         insumo.setStockMinimoAlerta(request.getStockMinimoAlerta());
+        insumo.setLeadTimeDias(request.getLeadTimeDias());
+        insumo.setDiasCobertura(request.getDiasCobertura());
         return InsumoMapper.toResponse(repository.save(insumo));
     }
 

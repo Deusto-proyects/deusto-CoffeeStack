@@ -34,6 +34,14 @@ public class Insumo {
     @Column(nullable = false)
     private boolean activo = true;
 
+    /** Días que tarda el proveedor en servir el pedido. */
+    @Column(name = "lead_time_dias", nullable = false)
+    private int leadTimeDias = 7;
+
+    /** Días de stock objetivo que se quieren mantener una vez recibido el pedido. */
+    @Column(name = "dias_cobertura", nullable = false)
+    private int diasCobertura = 14;
+
     // ---- getters & setters ----
 
     public Long getId() { return id; }
@@ -50,5 +58,11 @@ public class Insumo {
 
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
+
+    public int getLeadTimeDias() { return leadTimeDias; }
+    public void setLeadTimeDias(int leadTimeDias) { this.leadTimeDias = leadTimeDias; }
+
+    public int getDiasCobertura() { return diasCobertura; }
+    public void setDiasCobertura(int diasCobertura) { this.diasCobertura = diasCobertura; }
 }
 
