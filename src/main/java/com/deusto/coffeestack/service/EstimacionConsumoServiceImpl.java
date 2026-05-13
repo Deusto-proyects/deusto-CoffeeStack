@@ -27,9 +27,7 @@ public class EstimacionConsumoServiceImpl implements EstimacionConsumoService {
     @Override
     @Transactional(readOnly = true)
     public EstimacionConsumoResponse calcular(Long insumoId, int ventanaDias, int horizonteDias) {
-        if (ventanaDias < 1) {
-            throw new IllegalArgumentException("ventanaDias debe ser >= 1");
-        }
+        validarVentana(ventanaDias);
         if (horizonteDias < 0) {
             throw new IllegalArgumentException("horizonteDias no puede ser negativo");
         }
@@ -37,23 +35,11 @@ public class EstimacionConsumoServiceImpl implements EstimacionConsumoService {
         Insumo insumo = insumoRepository.findById(insumoId)
                 .orElseThrow(() -> new NotFoundException("Insumo no encontrado: " + insumoId));
 
-        LocalDateTime hasta = LocalDateTime.now();
-        LocalDateTime desde = hasta.minusDays(ventanaDias);
+        List<MovimientoInventario> movimientos = movimientosEnVentana(insumoId, ventanaDias);
 
-        List<MovimientoInventario> movimientos =
-                movimientoInventarioRepository.findMovimientosSalidaByInsumoAndRango(insumoId, desde, hasta);
-
-        double consumoTotal = movimientos.stream()
-                .mapToDouble(MovimientoInventario::getCantidad)
-                .sum();
-
+        double consumoTotal = sumaCantidades(movimientos);
         double consumoMedioDiario = consumoTotal / ventanaDias;
-
-        int diasConActividad = (int) movimientos.stream()
-                .map(m -> m.getFechaHora().toLocalDate())
-                .distinct()
-                .count();
-
+        int diasConActividad = contarDiasConActividad(movimientos);
         double consumoProyectado = consumoMedioDiario * horizonteDias;
 
         return new EstimacionConsumoResponse(
@@ -66,5 +52,40 @@ public class EstimacionConsumoServiceImpl implements EstimacionConsumoService {
                 diasConActividad,
                 horizonteDias,
                 consumoProyectado);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public double calcularConsumoMedioDiario(Long insumoId, int ventanaDias) {
+        validarVentana(ventanaDias);
+        List<MovimientoInventario> movimientos = movimientosEnVentana(insumoId, ventanaDias);
+        return sumaCantidades(movimientos) / ventanaDias;
+    }
+
+    // ---- helpers ----
+
+    private void validarVentana(int ventanaDias) {
+        if (ventanaDias < 1) {
+            throw new IllegalArgumentException("ventanaDias debe ser >= 1");
+        }
+    }
+
+    private List<MovimientoInventario> movimientosEnVentana(Long insumoId, int ventanaDias) {
+        LocalDateTime hasta = LocalDateTime.now();
+        LocalDateTime desde = hasta.minusDays(ventanaDias);
+        return movimientoInventarioRepository.findMovimientosSalidaByInsumoAndRango(insumoId, desde, hasta);
+    }
+
+    private double sumaCantidades(List<MovimientoInventario> movimientos) {
+        return movimientos.stream()
+                .mapToDouble(MovimientoInventario::getCantidad)
+                .sum();
+    }
+
+    private int contarDiasConActividad(List<MovimientoInventario> movimientos) {
+        return (int) movimientos.stream()
+                .map(m -> m.getFechaHora().toLocalDate())
+                .distinct()
+                .count();
     }
 }
