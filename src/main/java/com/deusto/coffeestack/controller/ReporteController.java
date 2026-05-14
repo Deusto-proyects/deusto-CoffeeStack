@@ -1,8 +1,10 @@
 package com.deusto.coffeestack.controller;
 
 import com.deusto.coffeestack.dto.Granularidad;
+import com.deusto.coffeestack.dto.ReporteComparativoResponse;
 import com.deusto.coffeestack.dto.ReporteConsumoResponse;
 import com.deusto.coffeestack.service.CsvExportService;
+import com.deusto.coffeestack.service.ReporteComparativoService;
 import com.deusto.coffeestack.service.ReporteConsumoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Reportes operacionales para el propietario del negocio.
@@ -34,10 +37,13 @@ public class ReporteController {
 
     private final ReporteConsumoService service;
     private final CsvExportService csvExportService;
+    private final ReporteComparativoService comparativoService;
 
-    public ReporteController(ReporteConsumoService service, CsvExportService csvExportService) {
+    public ReporteController(ReporteConsumoService service, CsvExportService csvExportService,
+                             ReporteComparativoService comparativoService) {
         this.service = service;
         this.csvExportService = csvExportService;
+        this.comparativoService = comparativoService;
     }
 
     @GetMapping("/consumo")
@@ -71,5 +77,26 @@ public class ReporteController {
                 .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
                 .contentLength(bytes.length)
                 .body(bytes);
+    }
+
+    /**
+     * Reporte comparativo de consumo para múltiples insumos en paralelo.
+     *
+     * <p>Permite al propietario identificar patrones y costes operativos
+     * comparando el consumo de varios insumos en el mismo rango de fechas.
+     *
+     * @param insumoIds    IDs de los insumos a comparar (opcional; vacío = todos los activos)
+     * @param desde        inicio del rango (inclusive)
+     * @param hasta        fin del rango (inclusive)
+     * @param granularidad agrupación temporal de la serie (DIA / SEMANA / MES)
+     */
+    @GetMapping("/consumo/comparativa")
+    @Operation(summary = "Reporte comparativo de consumo para múltiples insumos")
+    public ReporteComparativoResponse consumoComparativo(
+            @RequestParam(required = false) List<Long> insumoIds,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "DIA") Granularidad granularidad) {
+        return comparativoService.generar(insumoIds, desde, hasta, granularidad);
     }
 }
