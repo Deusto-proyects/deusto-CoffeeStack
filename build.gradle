@@ -101,6 +101,14 @@ javadoc {
 // JaCoCo: cobertura tras los tests unitarios
 jacocoTestReport {
     dependsOn test
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/config/SecurityConfig.class',
+                '**/CoffeeStackApplication.class'
+            ])
+        }))
+    }
     reports {
         xml.required = true
         html.required = true
