@@ -26,6 +26,7 @@ import VentaForm from './pages/VentaForm'
 import VentaDetalle from './pages/VentaDetalle'
 import CoberturaInsumos from './pages/CoberturaInsumos'
 import ReporteConsumo from './pages/ReporteConsumo'
+import ReporteComparativo from './pages/ReporteComparativo'
 import Reportes from './pages/Reportes'
 
 export default function App() {
@@ -161,6 +162,15 @@ export default function App() {
           element={
             <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
               <ReporteConsumo />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="reportes/comparativa"
+          element={
+            <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
+              <ReporteComparativo />
             </ProtectedRoute>
           }
         />

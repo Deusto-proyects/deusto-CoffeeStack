@@ -162,6 +162,7 @@ export default function ReporteConsumo() {
               >
                 <option value="DIA">Día</option>
                 <option value="SEMANA">Semana</option>
+                <option value="MES">Mes</option>
               </select>
             </div>
             <div className="col-md-3">

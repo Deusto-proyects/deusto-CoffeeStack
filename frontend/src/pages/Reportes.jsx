@@ -176,6 +176,7 @@ function ReporteConsumoCard({ insumos }) {
           >
             <option value="DIA">Por día</option>
             <option value="SEMANA">Por semana</option>
+            <option value="MES">Por mes</option>
           </select>
         </div>
       </div>
@@ -224,10 +225,16 @@ export default function Reportes() {
         title="Exportar reportes"
         subtitle="Descarga los datos del sistema en formato CSV para analizarlos en Excel, Google Sheets o cualquier herramienta externa."
         actions={
-          <Link to="/reportes/consumo" className="btn btn-outline-secondary btn-sm">
-            <i className="bi bi-bar-chart-line me-1" />
-            Ver reporte de consumo
-          </Link>
+          <div className="d-flex gap-2 flex-wrap">
+            <Link to="/reportes/consumo" className="btn btn-outline-secondary btn-sm">
+              <i className="bi bi-bar-chart-line me-1" />
+              Consumo individual
+            </Link>
+            <Link to="/reportes/comparativa" className="btn btn-coffee btn-sm">
+              <i className="bi bi-bar-chart-steps me-1" />
+              Comparativa multi-insumo
+            </Link>
+          </div>
         }
       />
 
