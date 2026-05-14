@@ -169,4 +169,27 @@ class ReporteConsumoServiceImplTest {
         assertThat(r.getSerie().get(1).getFecha()).isEqualTo(LocalDate.of(2026, 1, 12));
         assertThat(r.getSerie().get(1).getCantidad()).isEqualTo(4.0);
     }
+
+    @Test
+    void serieMensualAgrupaPorPrimerDiaDelMes() {
+        // 15 enero + 28 enero → 1 enero; 5 febrero → 1 febrero
+        List<MovimientoInventario> movs = List.of(
+                mov(LocalDateTime.of(2026, 1, 15, 9, 0), TipoMovimiento.VENTA, 3.0, loteConPrecio),
+                mov(LocalDateTime.of(2026, 1, 28, 9, 0), TipoMovimiento.VENTA, 2.0, loteConPrecio),
+                mov(LocalDateTime.of(2026, 2, 5, 9, 0), TipoMovimiento.VENTA, 4.0, loteConPrecio)
+        );
+        when(movimientoRepository.findMovimientosSalidaByInsumoAndRango(eq(1L), any(), any()))
+                .thenReturn(movs);
+
+        ReporteConsumoResponse r = service.generar(1L,
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 2, 28),
+                Granularidad.MES);
+
+        assertThat(r.getSerie()).hasSize(2);
+        assertThat(r.getSerie().get(0).getFecha()).isEqualTo(LocalDate.of(2026, 1, 1));
+        assertThat(r.getSerie().get(0).getCantidad()).isEqualTo(5.0);   // 3 + 2
+        assertThat(r.getSerie().get(1).getFecha()).isEqualTo(LocalDate.of(2026, 2, 1));
+        assertThat(r.getSerie().get(1).getCantidad()).isEqualTo(4.0);
+    }
 }

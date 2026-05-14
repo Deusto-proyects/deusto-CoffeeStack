@@ -129,6 +129,10 @@ public class ReporteConsumoServiceImpl implements ReporteConsumoService {
             // Lunes de la semana ISO que contiene la fecha
             return fecha.with(WeekFields.of(Locale.UK).dayOfWeek(), 1);
         }
+        if (granularidad == Granularidad.MES) {
+            // Primer día del mes
+            return fecha.withDayOfMonth(1);
+        }
         return fecha;
     }
 }

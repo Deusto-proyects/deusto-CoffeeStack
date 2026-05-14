@@ -5,5 +5,6 @@ package com.deusto.coffeestack.dto;
  */
 public enum Granularidad {
     DIA,
-    SEMANA
+    SEMANA,
+    MES
 }
