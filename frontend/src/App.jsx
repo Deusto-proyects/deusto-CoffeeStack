@@ -25,6 +25,7 @@ import Ventas from './pages/Ventas'
 import VentaForm from './pages/VentaForm'
 import VentaDetalle from './pages/VentaDetalle'
 import CoberturaInsumos from './pages/CoberturaInsumos'
+import SugerenciasReposicion from './pages/SugerenciasReposicion'
 import ReporteConsumo from './pages/ReporteConsumo'
 import ReporteComparativo from './pages/ReporteComparativo'
 import Reportes from './pages/Reportes'
@@ -144,6 +145,15 @@ export default function App() {
           element={
             <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
               <CoberturaInsumos />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="reposicion"
+          element={
+            <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
+              <SugerenciasReposicion />
             </ProtectedRoute>
           }
         />
