@@ -1,6 +1,15 @@
 spring:
   profiles:
     active: h2
+  ai:
+    ollama:
+      base-url: ${OLLAMA_URL:http://localhost:11434}
+      chat:
+        options:
+          model: qwen2.5:7b
+          temperature: 0.2
+          num-ctx: 8192
+          num-predict: 400
 
 server:
   port: 8080
@@ -8,6 +17,13 @@ server:
 jwt:
   secret: CoffeeStackSuperSecretKeyQueDebeSerLargaParaHS256AlMenos32Bytes!!
   expiration: 86400000
+
+ai:
+  chatbot:
+    connect-timeout-seconds: 10
+    read-timeout-seconds: 120
+    snapshot-ttl-seconds: 300
+    retry-max-attempts: 3
 
 ---
 spring:
@@ -53,7 +69,7 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:postgresql://localhost:5432/coffeestack
+    url: jdbc:postgresql://localhost:5433/coffeestack
     driver-class-name: org.postgresql.Driver
     username: ${DB_USER:coffee}
     password: ${DB_PASS:coffee}
@@ -87,4 +103,7 @@ spring:
     show-sql: true
   flyway:
     enabled: false
+  ai:
+    ollama:
+      base-url: http://localhost:9
 

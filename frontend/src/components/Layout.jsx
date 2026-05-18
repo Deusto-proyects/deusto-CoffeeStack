@@ -66,9 +66,11 @@ export default function Layout() {
               {hasRole('PROPIETARIO', 'ROOT') && navItem('/estimacion-consumo', 'bi-graph-up-arrow', 'Estimación')}
               {hasRole('PROPIETARIO', 'ROOT') && navItem('/cobertura-insumos', 'bi-shield-exclamation', 'Cobertura')}
               {hasRole('PROPIETARIO', 'ROOT') && navItem('/reposicion', 'bi-cart-plus', 'Reposición')}
+              {hasRole('PROPIETARIO', 'ROOT') && navItem('/chatbot', 'bi-robot', 'Asistente IA')}
               {hasRole('PROPIETARIO', 'ROOT') && navItem('/reportes', 'bi-file-earmark-arrow-down', 'Exportar')}
               {hasRole('PROPIETARIO', 'ROOT') && navItem('/reportes/consumo', 'bi-bar-chart-line', 'Reporte consumo')}
               {hasRole('PROPIETARIO', 'ROOT') && navItem('/reportes/comparativa', 'bi-bar-chart-steps', 'Comparativa')}
+              {hasRole('PROPIETARIO', 'ROOT') && navItem('/reportes/motivos', 'bi-clipboard-data-fill', 'Motivos')}
               {navItem('/ventas', 'bi-receipt', 'Ventas')}
               {hasRole('ROOT') && navItem('/usuarios', 'bi-people-fill', 'Usuarios')}
             </ul>

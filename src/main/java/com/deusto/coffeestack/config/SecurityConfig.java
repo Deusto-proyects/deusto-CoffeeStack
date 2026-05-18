@@ -105,6 +105,9 @@ public class SecurityConfig {
                     // User management → ROOT only
                     .requestMatchers("/api/usuarios/**").hasRole("ROOT")
 
+                    // Asistente IA: solo PROPIETARIO/ROOT (decisiones de gestión)
+                    .requestMatchers("/api/chatbot/**").hasAnyRole("PROPIETARIO", "ROOT")
+
                     .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

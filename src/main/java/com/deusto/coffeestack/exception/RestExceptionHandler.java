@@ -29,4 +29,9 @@ public class RestExceptionHandler {
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(new ApiError(ex.getMessage()));
     }
+
+    @ExceptionHandler(ChatbotUnavailableException.class)
+    public ResponseEntity<ApiError> handleChatbotUnavailable(ChatbotUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiError(ex.getMessage()));
+    }
 }

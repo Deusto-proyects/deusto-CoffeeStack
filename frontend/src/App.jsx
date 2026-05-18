@@ -29,6 +29,8 @@ import SugerenciasReposicion from './pages/SugerenciasReposicion'
 import ReporteConsumo from './pages/ReporteConsumo'
 import ReporteComparativo from './pages/ReporteComparativo'
 import Reportes from './pages/Reportes'
+import Chatbot from './pages/Chatbot'
+import ReporteMotivos from './pages/ReporteMotivos'
 
 export default function App() {
   return (
@@ -159,6 +161,15 @@ export default function App() {
         />
 
         <Route
+          path="chatbot"
+          element={
+            <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
+              <Chatbot />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="reportes"
           element={
             <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
@@ -181,6 +192,15 @@ export default function App() {
           element={
             <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
               <ReporteComparativo />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="reportes/motivos"
+          element={
+            <ProtectedRoute roles={['PROPIETARIO', 'ROOT']}>
+              <ReporteMotivos />
             </ProtectedRoute>
           }
         />

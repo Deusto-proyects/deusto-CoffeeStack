@@ -5,6 +5,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
 const client = axios.create({
   baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 130000,
 })
 
 client.interceptors.request.use((config) => {
@@ -34,8 +35,11 @@ export default client
 
 export function apiErrorMessage(err) {
   if (!err) return 'Error desconocido'
+  if (err.code === 'ECONNABORTED' || err.message?.toLowerCase().includes('timeout')) {
+    return 'El asistente está tardando demasiado en responder. Vuelve a intentarlo en unos segundos.'
+  }
   const r = err.response
-  if (!r) return err.message || 'Error de red'
+  if (!r) return 'No se pudo contactar con el servidor. Comprueba tu conexión.'
   const d = r.data
   if (typeof d === 'string') return d
   if (d?.message) return d.message

@@ -64,6 +64,55 @@ La migración `V11__demo_data.sql` (solo en perfiles `local` y `dev`) precarga:
 Eso permite ver el **Reporte de consumo** (`/reportes/consumo`) con datos no triviales
 en el rango por defecto (últimos 30 días).
 
+## Asistente IA (Chatbot)
+
+El proyecto incluye un asistente conversacional **100 % local** (ningún dato sale del equipo) que ayuda al PROPIETARIO/ROOT a tomar decisiones operativas (qué reponer, riesgo de mermas, cobertura de stock, etc.).
+
+### Qué hace falta instalar
+
+- **Ollama** corriendo en `localhost:11434` con el modelo **`qwen2.5:7b`** (descarga ~5 GB, persiste en disco).
+- **~6 GB de RAM libres** mientras se usa (recomendado 8 GB+).
+- GPU NVIDIA opcional para acelerar respuestas.
+
+Hay dos formas de tener Ollama listo:
+
+**Opción A — Ollama dentro del `docker-compose` (recomendado).** Ya está definido el servicio `ollama` que descarga y precarga el modelo automáticamente al primer arranque:
+
+```bash
+docker compose up -d
+# Espera 2–5 min en el primer arranque mientras descarga qwen2.5:7b.
+# Comprueba que está listo:
+docker compose ps   # el servicio ollama debe figurar como (healthy)
+```
+
+**Opción B — Ollama nativo en tu equipo** (https://ollama.com/download):
+
+```bash
+ollama pull qwen2.5:7b
+ollama serve
+```
+
+### Cómo usarlo
+
+Tras arrancar backend y frontend (`./gradlew bootRun` + `npm run dev`), inicia sesión y entra en **"Asistente IA"** en la barra de navegación (solo visible para PROPIETARIO/ROOT). El primer turno tarda 30–60 s porque el modelo se carga en memoria; los siguientes son más rápidos (5–15 s en CPU, <2 s con GPU).
+
+Endpoints REST:
+
+| Método | Ruta | Acceso | Descripción |
+|--------|------|--------|-------------|
+| `POST` | `/api/chatbot/preguntar` | PROPIETARIO/ROOT | Enviar una pregunta y obtener respuesta |
+| `GET` | `/api/chatbot/snapshot` | PROPIETARIO/ROOT | Ver el snapshot exacto que se envía al modelo (debug) |
+
+Variables relevantes en `application.yml`:
+
+| Clave | Default | Para qué |
+|-------|---------|----------|
+| `spring.ai.ollama.base-url` | `http://localhost:11434` | URL de Ollama (sobrescribible con `OLLAMA_URL`) |
+| `spring.ai.ollama.chat.options.model` | `qwen2.5:7b` | Modelo a utilizar |
+| `ai.chatbot.read-timeout-seconds` | `120` | Tiempo máx. de espera por respuesta |
+
+Documentación detallada (arquitectura, snapshot, limitaciones): [`docs/CHATBOT.md`](docs/CHATBOT.md).
+
 ## Compilación y ejecución (avanzado)
 
 ### Perfiles disponibles

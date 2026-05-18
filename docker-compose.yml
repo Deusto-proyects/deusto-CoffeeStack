@@ -16,5 +16,48 @@ services:
       timeout: 5s
       retries: 5
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: coffeestack-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - coffeestack_ollama_data:/root/.ollama
+    environment:
+      # Mantiene el modelo en RAM 24h en lugar del default 5 min, evitando
+      # que la primera petición tras un periodo de inactividad pague 30-60 s
+      # de carga.
+      OLLAMA_KEEP_ALIVE: "24h"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        ollama serve &
+        pid=$$!
+        echo "Esperando a que Ollama responda..."
+        until ollama list >/dev/null 2>&1; do sleep 1; done
+        echo "Descargando qwen2.5:7b si no está..."
+        ollama pull qwen2.5:7b
+        echo "Precargando modelo en memoria..."
+        ollama run qwen2.5:7b "ok" >/dev/null 2>&1 || true
+        touch /tmp/model-ready
+        echo "Modelo listo."
+        wait $$pid
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/model-ready && ollama list | grep -q qwen2.5"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 180s
+    # GPU NVIDIA opcional — descomentar si está disponible:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
 volumes:
   coffeestack_pgdata:
+  coffeestack_ollama_data:
