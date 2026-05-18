@@ -5,6 +5,7 @@ import com.deusto.coffeestack.domain.MovimientoInventario;
 import com.deusto.coffeestack.domain.TipoMovimiento;
 import com.deusto.coffeestack.dto.AjusteRequest;
 import com.deusto.coffeestack.dto.MovimientoResponse;
+import com.deusto.coffeestack.dto.ReporteMotivoResponse;
 import com.deusto.coffeestack.exception.NotFoundException;
 import com.deusto.coffeestack.repository.InsumoRepository;
 import com.deusto.coffeestack.repository.LoteRepository;
@@ -120,6 +121,25 @@ public class AjusteServiceImpl implements AjusteService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    /** Rango por defecto cuando no se especifican fechas (cubre cualquier dato razonable). */
+    private static final LocalDateTime DEFAULT_DESDE = LocalDateTime.of(2000, 1, 1, 0, 0);
+    private static final LocalDateTime DEFAULT_HASTA = LocalDateTime.of(2100, 12, 31, 23, 59);
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReporteMotivoResponse> reportePorMotivo(TipoMovimiento tipo,
+                                                        LocalDateTime desde,
+                                                        LocalDateTime hasta) {
+        if (desde != null && hasta != null && desde.isAfter(hasta)) {
+            throw new IllegalArgumentException("'desde' no puede ser posterior a 'hasta'");
+        }
+        LocalDateTime d = desde != null ? desde : DEFAULT_DESDE;
+        LocalDateTime h = hasta != null ? hasta : DEFAULT_HASTA;
+        return tipo == null
+                ? movimientoRepository.agruparPorMotivo(d, h)
+                : movimientoRepository.agruparPorMotivoYTipo(tipo, d, h);
     }
 
     private MovimientoResponse toResponse(MovimientoInventario m) {

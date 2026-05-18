@@ -2,6 +2,7 @@ package com.deusto.coffeestack.repository;
 
 import com.deusto.coffeestack.domain.MovimientoInventario;
 import com.deusto.coffeestack.domain.TipoMovimiento;
+import com.deusto.coffeestack.dto.ReporteMotivoResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -66,6 +67,40 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
            "m.fechaHora BETWEEN :desde AND :hasta")
     List<MovimientoInventario> findMovimientosSalidaByInsumoAndRango(
             @Param("insumoId") Long insumoId,
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
+
+    /**
+     * Agrupa movimientos por motivo y tipo dentro de un rango temporal,
+     * agregando cantidad total y número de incidencias. Sin filtro de tipo.
+     *
+     * <p>Se ofrece como variante separada (vs. una única consulta con
+     * {@code :tipo IS NULL}) porque PostgreSQL no puede inferir el tipo de
+     * un parámetro JDBC cuando solo aparece comparado contra {@code NULL},
+     * y devuelve "could not determine data type of parameter".
+     */
+    @Query("SELECT new com.deusto.coffeestack.dto.ReporteMotivoResponse(" +
+           "  m.motivo, m.tipoMovimiento, COUNT(m), SUM(m.cantidad), " +
+           "  MIN(m.fechaHora), MAX(m.fechaHora)) " +
+           "FROM MovimientoInventario m WHERE " +
+           "m.fechaHora BETWEEN :desde AND :hasta " +
+           "GROUP BY m.motivo, m.tipoMovimiento " +
+           "ORDER BY SUM(m.cantidad) DESC")
+    List<ReporteMotivoResponse> agruparPorMotivo(
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
+
+    /** Igual que {@link #agruparPorMotivo(LocalDateTime, LocalDateTime)} pero filtrando por un tipo concreto. */
+    @Query("SELECT new com.deusto.coffeestack.dto.ReporteMotivoResponse(" +
+           "  m.motivo, m.tipoMovimiento, COUNT(m), SUM(m.cantidad), " +
+           "  MIN(m.fechaHora), MAX(m.fechaHora)) " +
+           "FROM MovimientoInventario m WHERE " +
+           "m.tipoMovimiento = :tipo AND " +
+           "m.fechaHora BETWEEN :desde AND :hasta " +
+           "GROUP BY m.motivo, m.tipoMovimiento " +
+           "ORDER BY SUM(m.cantidad) DESC")
+    List<ReporteMotivoResponse> agruparPorMotivoYTipo(
+            @Param("tipo") TipoMovimiento tipo,
             @Param("desde") LocalDateTime desde,
             @Param("hasta") LocalDateTime hasta);
 }

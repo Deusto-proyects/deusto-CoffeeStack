@@ -3,6 +3,7 @@ package com.deusto.coffeestack.service;
 import com.deusto.coffeestack.domain.TipoMovimiento;
 import com.deusto.coffeestack.dto.AjusteRequest;
 import com.deusto.coffeestack.dto.MovimientoResponse;
+import com.deusto.coffeestack.dto.ReporteMotivoResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,6 +46,22 @@ public interface AjusteService {
      */
     List<MovimientoResponse> listarMovimientosFiltrados(
             Long insumoId,
+            TipoMovimiento tipo,
+            LocalDateTime desde,
+            LocalDateTime hasta);
+
+    /**
+     * Genera el reporte de movimientos agrupado por motivo y tipo, con el
+     * número de incidencias y la cantidad total acumulada por cada combinación.
+     * Pensado para que el propietario detecte patrones de desperdicio y enfoque
+     * mejoras de proceso (issue #24).
+     *
+     * @param tipo  restringe a un tipo concreto (nullable: incluye todos)
+     * @param desde inicio del rango, inclusivo (nullable)
+     * @param hasta fin del rango, inclusivo (nullable)
+     * @return filas ordenadas por cantidad total descendente
+     */
+    List<ReporteMotivoResponse> reportePorMotivo(
             TipoMovimiento tipo,
             LocalDateTime desde,
             LocalDateTime hasta);
