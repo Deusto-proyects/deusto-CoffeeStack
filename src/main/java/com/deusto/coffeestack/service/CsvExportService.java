@@ -2,6 +2,7 @@ package com.deusto.coffeestack.service;
 
 import com.deusto.coffeestack.dto.PuntoSerieDTO;
 import com.deusto.coffeestack.dto.ReporteConsumoResponse;
+import com.deusto.coffeestack.dto.ReporteMotivoResponse;
 import com.deusto.coffeestack.dto.ReporteVentasDTO;
 import org.springframework.stereotype.Service;
 
@@ -77,6 +78,37 @@ public class CsvExportService {
                   .append(punto.getCoste() != null ? punto.getCoste().toPlainString() : "0.00")
                   .append(CRLF);
             }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Genera el CSV del reporte de mermas/ajustes agrupado por motivo y tipo.
+     *
+     * <p>Columnas: Motivo, Tipo, Nº incidencias, Cantidad total, Primera fecha, Última fecha
+     *
+     * <p>Pensado para que el propietario pueda analizar patrones de desperdicio en
+     * Excel u otras herramientas externas (issue #24).
+     *
+     * @param filas filas del reporte (ordenadas por cantidad total desc)
+     * @return string CSV con BOM UTF-8
+     */
+    public String motivosToCsv(List<ReporteMotivoResponse> filas) {
+        StringBuilder sb = new StringBuilder(BOM);
+        sb.append("Motivo").append(SEP)
+          .append("Tipo").append(SEP)
+          .append("Nº incidencias").append(SEP)
+          .append("Cantidad total").append(SEP)
+          .append("Primera fecha").append(SEP)
+          .append("Última fecha").append(CRLF);
+
+        for (ReporteMotivoResponse fila : filas) {
+            sb.append(escapeCsv(fila.getMotivo())).append(SEP)
+              .append(fila.getTipoMovimiento()).append(SEP)
+              .append(fila.getNumIncidencias()).append(SEP)
+              .append(String.format("%.4f", fila.getCantidadTotal())).append(SEP)
+              .append(fila.getPrimeraFecha() != null ? fila.getPrimeraFecha().toLocalDate() : "").append(SEP)
+              .append(fila.getUltimaFecha()  != null ? fila.getUltimaFecha().toLocalDate()  : "").append(CRLF);
         }
         return sb.toString();
     }

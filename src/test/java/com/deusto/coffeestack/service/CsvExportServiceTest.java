@@ -138,6 +138,73 @@ class CsvExportServiceTest {
         assertThat(csv).contains("Unidades Vendidas");
     }
 
+    // ── motivosToCsv ──────────────────────────────────────────────────────────
+
+    @Test
+    void motivosToCsv_incluyeBomUtf8() {
+        String csv = service.motivosToCsv(List.of());
+        assertThat(csv).startsWith(CsvExportService.BOM);
+    }
+
+    @Test
+    void motivosToCsv_incluyeCabecerasCorrectas() {
+        String csv = service.motivosToCsv(List.of());
+        assertThat(csv).contains("Motivo");
+        assertThat(csv).contains("Tipo");
+        assertThat(csv).contains("incidencias");
+        assertThat(csv).contains("Cantidad total");
+        assertThat(csv).contains("Primera fecha");
+        assertThat(csv).contains("ltima fecha");   // 'Ú' puede quedar como U+00DA pero el campo sí está
+    }
+
+    @Test
+    void motivosToCsv_conFilaDatos_incluyeValoresCorrectos() {
+        LocalDate hoy = LocalDate.now();
+        var fila = new com.deusto.coffeestack.dto.ReporteMotivoResponse(
+                "Caducidad leche", TipoMovimiento.MERMA, 5L, 12.5,
+                hoy.minusDays(10).atStartOfDay(), hoy.atStartOfDay());
+
+        String csv = service.motivosToCsv(List.of(fila));
+
+        assertThat(csv).contains("Caducidad leche");
+        assertThat(csv).contains("MERMA");
+        assertThat(csv).contains("5");
+        // La cantidad se formatea con 4 decimales (separador depende del Locale de la JVM)
+        assertThat(csv).containsPattern("12[.,]5000");
+    }
+
+    @Test
+    void motivosToCsv_motivoConComa_esEscapado() {
+        var fila = new com.deusto.coffeestack.dto.ReporteMotivoResponse(
+                "Rotura, accidente", TipoMovimiento.ROTURA, 1L, 3.0,
+                null, null);
+
+        String csv = service.motivosToCsv(List.of(fila));
+
+        // El motivo con coma debe quedar entre comillas dobles
+        assertThat(csv).contains("\"Rotura, accidente\"");
+    }
+
+    @Test
+    void motivosToCsv_listaVacia_soloDevuelveCabecera() {
+        String csv = service.motivosToCsv(List.of());
+        // Solo BOM + cabecera, sin filas de datos
+        long lineCount = csv.lines().count();
+        assertThat(lineCount).isEqualTo(1);  // solo cabecera (CRLF no genera línea extra en lines())
+    }
+
+    @Test
+    void motivosToCsv_fechasNulas_noLanzaExcepcion() {
+        var fila = new com.deusto.coffeestack.dto.ReporteMotivoResponse(
+                "Sin fecha", TipoMovimiento.AJUSTE_NEGATIVO, 2L, 5.0,
+                null, null);
+
+        String csv = service.motivosToCsv(List.of(fila));
+
+        assertThat(csv).isNotBlank();
+        assertThat(csv).contains("Sin fecha");
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private ReporteConsumoResponse reporteMinimo() {

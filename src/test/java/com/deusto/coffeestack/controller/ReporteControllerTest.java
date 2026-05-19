@@ -28,6 +28,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.deusto.coffeestack.dto.ReporteMotivoResponse;
+import com.deusto.coffeestack.service.AjusteService;
+
 @WebMvcTest(ReporteController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class ReporteControllerTest {
@@ -43,6 +46,9 @@ class ReporteControllerTest {
 
     @MockBean
     private ReporteComparativoService comparativoService;
+
+    @MockBean
+    private AjusteService ajusteService;
 
     @MockBean
     private com.deusto.coffeestack.security.JwtAuthFilter jwtAuthFilter;
@@ -198,5 +204,39 @@ class ReporteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.granularidad").value("MES"))
                 .andExpect(jsonPath("$.insumos").isArray());
+    }
+
+    // ── GET /api/reportes/motivos/csv ─────────────────────────────────────────
+
+    @Test
+    void descargarMotivosCsv_sinFiltros_retornaCsvConHeaders() throws Exception {
+        ReporteMotivoResponse fila = new ReporteMotivoResponse(
+                "Caducidad", TipoMovimiento.MERMA, 3L, 7.5,
+                LocalDate.of(2026, 1, 1).atStartOfDay(),
+                LocalDate.of(2026, 3, 31).atStartOfDay());
+        when(ajusteService.reportePorMotivo(eq(null), any(), any())).thenReturn(List.of(fila));
+        when(csvExportService.motivosToCsv(any())).thenReturn("\uFEFFMotivo,Tipo,...\nCaducidad,MERMA,...\n");
+
+        mockMvc.perform(get("/api/reportes/motivos/csv"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition",
+                        org.hamcrest.Matchers.containsString("attachment")))
+                .andExpect(header().string("Content-Disposition",
+                        org.hamcrest.Matchers.containsString("reporte_motivos_")))
+                .andExpect(content().contentTypeCompatibleWith("text/csv"));
+    }
+
+    @Test
+    void descargarMotivosCsv_conFiltroTipoYFechas_llamaServicioConParametros() throws Exception {
+        when(ajusteService.reportePorMotivo(eq(TipoMovimiento.MERMA), any(), any()))
+                .thenReturn(List.of());
+        when(csvExportService.motivosToCsv(any())).thenReturn("\uFEFFMotivo,Tipo\n");
+
+        mockMvc.perform(get("/api/reportes/motivos/csv")
+                        .param("tipo", "MERMA")
+                        .param("desde", "2026-01-01")
+                        .param("hasta", "2026-03-31"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/csv"));
     }
 }
