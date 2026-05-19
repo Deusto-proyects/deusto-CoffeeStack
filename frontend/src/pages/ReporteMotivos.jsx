@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import client, { apiErrorMessage } from '../api/client'
 import PageHeader from '../components/PageHeader'
+import { downloadCsv } from '../utils/csvDownload'
 
 /**
  * Reporte agregado de movimientos (mermas, roturas, ajustes) agrupados por
@@ -54,26 +55,6 @@ function fmtFecha(iso) {
 function fmtNum(n) {
   if (typeof n !== 'number' || Number.isNaN(n)) return '—'
   return n.toLocaleString(undefined, { maximumFractionDigits: 2 })
-}
-
-function exportCSV(filas) {
-  const header = ['Motivo', 'Tipo', 'Nº incidencias', 'Cantidad total', 'Primera fecha', 'Última fecha']
-  const rows = filas.map((f) => [
-    `"${(f.motivo || '').replace(/"/g, '""')}"`,
-    f.tipoMovimiento,
-    f.numIncidencias,
-    f.cantidadTotal,
-    fmtFecha(f.primeraFecha),
-    fmtFecha(f.ultimaFecha),
-  ])
-  const csv = [header, ...rows].map((r) => r.join(',')).join('\n')
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `reporte_motivos_${new Date().toISOString().slice(0, 10)}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
 }
 
 function ultimosNDias(n) {
@@ -245,7 +226,21 @@ export default function ReporteMotivos() {
               <button
                 type="button"
                 className="btn btn-outline-coffee ms-auto"
-                onClick={() => exportCSV(filas)}
+                onClick={async () => {
+                  try {
+                    const params = {}
+                    if (filters.tipo) params.tipo = filters.tipo
+                    if (filters.desde) params.desde = filters.desde
+                    if (filters.hasta) params.hasta = filters.hasta
+                    await downloadCsv(
+                      '/api/reportes/motivos/csv',
+                      `reporte_motivos_${new Date().toISOString().slice(0, 10)}.csv`,
+                      params
+                    )
+                  } catch (err) {
+                    setError(err.message)
+                  }
+                }}
                 disabled={loading || filas.length === 0}
                 title="Descargar CSV"
               >

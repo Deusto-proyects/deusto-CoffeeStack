@@ -205,6 +205,105 @@ function ReporteConsumoCard({ insumos }) {
   )
 }
 
+// ─── Componente: Reporte de Motivos CSV ───────────────────────────────────────
+function ReporteMotivosCard() {
+  const [desde, setDesde] = useState(isoDaysAgo(90))
+  const [hasta, setHasta] = useState(isoToday())
+  const [tipo, setTipo] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [status, setStatus] = useState(null)
+
+  async function handleDownload() {
+    if (desde > hasta) {
+      setStatus({ msg: "La fecha 'Desde' debe ser anterior o igual a 'Hasta'.", type: 'warning' })
+      return
+    }
+    try {
+      setLoading(true)
+      setStatus(null)
+      const params = {}
+      if (tipo) params.tipo = tipo
+      if (desde) params.desde = desde
+      if (hasta) params.hasta = hasta
+      await downloadCsv(
+        '/api/reportes/motivos/csv',
+        `reporte_motivos_${isoToday()}.csv`,
+        params
+      )
+      setStatus({ msg: 'Fichero descargado correctamente.', type: 'success' })
+    } catch (e) {
+      setStatus({ msg: e.message, type: 'danger' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <ReportCard
+      icon="bi-clipboard-data-fill"
+      title="Mermas y ajustes por motivo"
+      description="Exporta el reporte consolidado de incidencias agrupadas por motivo y tipo (MERMA, ROTURA, etc.) para detectar patrones de desperdicio y optimizar procesos."
+    >
+      <div className="row g-2">
+        <div className="col-12">
+          <label className="form-label small mb-1">Tipo de movimiento</label>
+          <select
+            className="form-select form-select-sm"
+            value={tipo}
+            onChange={e => setTipo(e.target.value)}
+          >
+            <option value="">Todos los tipos</option>
+            <option value="MERMA">MERMA</option>
+            <option value="ROTURA">ROTURA</option>
+            <option value="AJUSTE_POSITIVO">AJUSTE POSITIVO</option>
+            <option value="AJUSTE_NEGATIVO">AJUSTE NEGATIVO</option>
+            <option value="VENTA">VENTA</option>
+          </select>
+        </div>
+        <div className="col-6">
+          <label className="form-label small mb-1">Desde</label>
+          <input
+            type="date"
+            className="form-control form-control-sm"
+            value={desde}
+            onChange={e => setDesde(e.target.value)}
+          />
+        </div>
+        <div className="col-6">
+          <label className="form-label small mb-1">Hasta</label>
+          <input
+            type="date"
+            className="form-control form-control-sm"
+            value={hasta}
+            onChange={e => setHasta(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <StatusAlert msg={status?.msg} type={status?.type} onClose={() => setStatus(null)} />
+
+      <div className="d-flex align-items-center justify-content-between mt-auto pt-2 border-top">
+        <div className="text-muted small">
+          <i className="bi bi-file-earmark-spreadsheet me-1 text-success" />
+          Columnas: <strong>Motivo · Tipo · Incidencias · Cantidad</strong>
+        </div>
+        <button
+          id="btn-reportes-motivos-csv"
+          className="btn btn-coffee"
+          onClick={handleDownload}
+          disabled={loading}
+        >
+          {loading ? (
+            <><span className="spinner-border spinner-border-sm me-2" />Generando…</>
+          ) : (
+            <><i className="bi bi-download me-2" />Descargar CSV</>
+          )}
+        </button>
+      </div>
+    </ReportCard>
+  )
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function Reportes() {
   const [insumos, setInsumos] = useState([])
@@ -230,9 +329,13 @@ export default function Reportes() {
               <i className="bi bi-bar-chart-line me-1" />
               Consumo individual
             </Link>
-            <Link to="/reportes/comparativa" className="btn btn-coffee btn-sm">
+            <Link to="/reportes/comparativa" className="btn btn-outline-secondary btn-sm">
               <i className="bi bi-bar-chart-steps me-1" />
               Comparativa multi-insumo
+            </Link>
+            <Link to="/reportes/motivos" className="btn btn-coffee btn-sm">
+              <i className="bi bi-clipboard-data-fill me-1" />
+              Reporte por motivos
             </Link>
           </div>
         }
@@ -254,6 +357,7 @@ export default function Reportes() {
         ) : (
           <ReporteConsumoCard insumos={insumos} />
         )}
+        <ReporteMotivosCard />
       </div>
 
       <div className="row mt-4">
