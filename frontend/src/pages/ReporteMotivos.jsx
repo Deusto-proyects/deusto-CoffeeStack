@@ -1,4 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts'
 import client, { apiErrorMessage } from '../api/client'
 import PageHeader from '../components/PageHeader'
 import { downloadCsv } from '../utils/csvDownload'
@@ -122,6 +132,20 @@ export default function ReporteMotivos() {
     const incidenciasTotales = filas.reduce((acc, f) => acc + (f.numIncidencias || 0), 0)
     const motivosUnicos = new Set(filas.map((f) => f.motivo)).size
     return { desperdicio, incidenciasDesperdicio, incidenciasTotales, motivosUnicos }
+  }, [filas])
+
+  // Preparamos datos para el gráfico: limitamos a los 10 con mayor cantidad
+  const chartData = useMemo(() => {
+    return [...filas]
+      .sort((a, b) => b.cantidadTotal - a.cantidadTotal)
+      .slice(0, 10)
+      .map((f) => ({
+        name: f.motivo.length > 20 ? f.motivo.substring(0, 20) + '...' : f.motivo,
+        tipo: f.tipoMovimiento,
+        cantidad: f.cantidadTotal,
+        incidencias: f.numIncidencias,
+        fullName: f.motivo
+      }))
   }, [filas])
 
   return (
@@ -250,6 +274,46 @@ export default function ReporteMotivos() {
           </div>
         </div>
       </form>
+
+      {/* Gráfico */}
+      {!loading && filas.length > 0 && (
+        <div className="card mb-3">
+          <div className="card-header">
+            <i className="bi bi-bar-chart-fill me-2"></i>Top 10 motivos por cantidad total
+          </div>
+          <div className="card-body">
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer>
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 12 }} 
+                    interval={0}
+                    angle={-25}
+                    textAnchor="end"
+                  />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value, name) => [
+                      fmtNum(value), 
+                      name === 'cantidad' ? 'Cantidad Total' : name
+                    ]}
+                    labelFormatter={(label, payload) => {
+                      if (payload && payload.length > 0) {
+                        return payload[0].payload.fullName + ' (' + payload[0].payload.tipo + ')'
+                      }
+                      return label
+                    }}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                  <Bar dataKey="cantidad" name="Cantidad Total" fill="#6f4e37" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabla */}
       <div className="card">
